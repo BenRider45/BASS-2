@@ -20,7 +20,7 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: "&File"
-            Action { text: "Open Project..."; shortcut: "Ctrl+O"; onTriggered: projectInitDialog.open() }
+            Action { text: "Open Project..."; shortcut: "Ctrl+O"; onTriggered: projectSelectWindow.open() }
             Action { text: "Save"; shortcut: "Ctrl+S"; onTriggered: annotationModel.save() }
             MenuSeparator {}
             Action { text: "Quit"; shortcut: "Ctrl+Q"; onTriggered: Qt.quit() }
@@ -201,6 +201,10 @@ ApplicationWindow {
     // ── Dialogs ──
     ProjectInitDialog {
         id: projectInitDialog
+      }
+
+    ProjectSelectWindow{
+        id: projectSelectWindow
     }
 
     PromptDialog {
@@ -243,7 +247,7 @@ ApplicationWindow {
     // Show project init on first launch
     Component.onCompleted: {
         if (!projectManager.isInitialized) {
-            projectInitDialog.open()
+            projectSelectWindow.open()
         }
     }
 }

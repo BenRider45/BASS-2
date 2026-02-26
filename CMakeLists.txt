@@ -42,6 +42,10 @@ qt_add_qml_module(bass_qml
         qml/panels/SettingsPanel.qml
         qml/panels/PlayerPanel.qml
         qml/panels/ClusterSummaryPanel.qml
+        qml/dialogs/LoadingSplashScreen.qml
+        qml/dialogs/ProjectLoadConfirmationDialog.qml
+        qml/dialogs/ProjectSelectWindow.qml
+        qml/dialogs/CreateProjectDialog.qml
         qml/dialogs/ProjectInitDialog.qml
         qml/dialogs/PromptDialog.qml
 )
