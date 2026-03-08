@@ -14,7 +14,6 @@ Rectangle {
         anchors.fill: parent
         Text{
             text: "Loading..."
-            anchors.top: parent.top
             anchors.topMargin: 50
             horizontalAlignment: Text.AlignHCenter
             anchors.horizontalCenter: parent.horizontalCenter

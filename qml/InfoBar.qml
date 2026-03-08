@@ -7,8 +7,8 @@ Rectangle {
     color: "#1e1e1e"
     implicitHeight: 28
 
-    property string leftText: projectManager.isInitialized
-        ? projectManager.birdName + " — " + annotationModel.currentFile
+    property string leftText: projectManager.projectAttached
+        ? projectManager.currentProjectData["proj_data"]["proj_bird"] + " — " + annotationModel.currentFile
         : "No project loaded"
     property string rightText: "Annotations: " + annotationModel.count
         + "  |  Page: " + spectrogramController.navPage

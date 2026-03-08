@@ -3,19 +3,57 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Material
 import BASS
-
 ApplicationWindow {
     id: window
     width: 1280
     height: 800
     visible: true
-    title: projectManager.isInitialized
-           ? "BASS — " + projectManager.birdName
+    title: projectManager.projectAttached
+           ? "BASS — " + projectManager.currentProjectData["proj_data"]["proj_bird"]
            : "BASS — Birdsong Annotations with Spike Sequences"
+           
 
     Material.theme: Material.Dark
     Material.accent: Material.Teal
 
+    property bool isLoading: false
+    property string projectName: projectManager.projectAttached ? projectManager.currentProjectData["proj_data"]["proj_name"] : "noProject"
+    property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectData["proj_data"]["proj_dir"] : "no/project/dir"
+    
+    Connections{
+      target: projectManager
+      function onProjectLoading(projectDir) {
+        console.log("Got to project loading")
+        projectSelectWindow.close();
+        // currentProjectDir = projectDir;
+        isLoading = true;
+      } 
+
+      function onProjectLoaded(projectData){
+        console.log("Saw onProjectLoaded Signal");
+        //currentProjectData= projectData;
+
+        // LoadingSplashScreen.close();
+        isLoading = false;
+
+     }
+      
+     function onCurrentProjectChanged(projectData){
+      console.log("New Project Data: ", projectData);
+
+     }
+
+     function onError(errormsg){
+      console.log("ERROR :( :", errormsg);
+
+     }
+    
+     function onProjectAttachedChanged(){
+      console.log("projectAttached Changed to ", projectManager.projectAttached);
+      
+     }
+
+    }
     // ── Menu Bar ──
     menuBar: MenuBar {
         Menu {
@@ -194,7 +232,8 @@ ApplicationWindow {
         }
 
         InfoBar {
-            Layout.fillWidth: true
+          Layout.fillWidth: true
+          Layout.fillHeight: true
         }
     }
 
@@ -203,9 +242,38 @@ ApplicationWindow {
         id: projectInitDialog
       }
 
-    ProjectSelectWindow{
+      ProjectSelectWindow{
+        
+        anchors.centerIn: parent
         id: projectSelectWindow
+        onConfirmedProject: function(name, path, makingNewProject){
+          //projectName = name;
+          console.log("Path: " + path);
+          //projectDir = path;
+
+          if(makingNewProject){
+            console.log("Making New Project");
+            projectManager.initProject(name, path, "Tweety Bird");
+
+          }else{
+            console.log("Opening not new project")
+            projectManager.loadProject(path);
+          }
+
+        }
+
+        onOpeningRecentProject: function(UID){     
+          console.log("Opening Recent Project");
+          projectManager.loadRecentProject(UID);
+        }
+      }
+
+    LoadingSplashScreen{
+      id: loadingScreen
+  
+      visible: isLoading
     }
+    
 
     PromptDialog {
         id: promptDialog
@@ -244,10 +312,11 @@ ApplicationWindow {
         }
     }
 
+      
     // Show project init on first launch
     Component.onCompleted: {
-        if (!projectManager.isInitialized) {
-            projectSelectWindow.open()
-        }
+      //if (!projectManager.isInitialized) {
+            projectSelectWindow.open();
+        //}
     }
 }

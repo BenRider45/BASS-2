@@ -2,218 +2,191 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import QtQuick.Window
 import BASS
-Rectangle {
-    id: projectSelectScreen
-    width: Window.width/2
-    height: Window.height/2
-    radius: 20
-    clip: true
-    color: "dimgray"
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenter: parent.verticalCenter
-    property string selectedProjectName: "";
-    property string selectedProjectPath: "";
-    signal confirmedProject(string projName, string projPath);
+Dialog {
+    id: projectSelectDialog
+    title: "Select or Create Project"
+    modal: true
+    width: Math.min(800, parent.width * 0.8)
+    height: Math.min(600, parent.height * 0.8)
 
-    CreateProjectDialog {
-        id: createProjectDialog
-        margins: -1
-        padding: 24
-        onProjectCreated: (path, name ) => {
-            console.log("project " + name + " created at " + "path");
-            selectedProjectName = name;
-            selectedProjectPath = path;
-            projectLoadConfirmationDialog.open();
-            }
+    property string selectedProjectName: ""
+    property string selectedProjectPath: ""
+    property bool useMockProjectList: true
+    property bool makingNewProject: false
 
-    }
+    signal confirmedProject(string projName, string projPath, bool newProject)
+    signal openingRecentProject(string UID)
 
-    ColumnLayout {
-        id: column
-        anchors.fill: parent
-        anchors.topMargin: 30
-        anchors.bottomMargin: 20
-        spacing:parent.Height/10
-		    Text {
-		        id: text1
-		        height: 49
-            opacity: 0.793
+    
+    contentItem: ColumnLayout {
+        spacing: 20
+
+        Text {
+            text: "BASS"
+            font.pixelSize: 36
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
-		        text: qsTr("BASS")
-		        font.pixelSize: 48
-		        horizontalAlignment: Text.AlignHCenter
-		        font.family: ".AppleSystemUIFont"
-          }
+            opacity: 0.9
+        }
 
-
-        Row {
-            id: row
-            height: 50
+        RowLayout {
             Layout.fillWidth: true
+            spacing: 12
+
             Button {
-                id: findProjectButton
-                text: qsTr("Find Project")
-                width: newProjectButton.Width
-                anchors.left: parent
-                
-                Layout.leftMargin: 30
+                text: "Find Project"
                 highlighted: true
+                Layout.fillWidth: true
                 onClicked: fileDialog.open()
             }
 
             Button {
-                id: newProjectButton
-                text: qsTr("Create New Project")
+                text: "Create New Project"
                 highlighted: true
-                anchors.right: parent
-                Layout.rightMargin: 30
+                Layout.fillWidth: true
                 onClicked: createProjectDialog.open()
             }
         }
-
-        FileDialog {
-            id: fileDialog
-            title: "Select a Project"
-            nameFilters: ["QML Projects (*.qmlproject)", "All files (*)"]
-
-            onAccepted: {
-                console.log("Project selected:", fileDialog.selectedFile)
-                projectLoadConfirmationDialog.open();
-            }
+        Text {
+            text: "Recent Projects"
+            font.pixelSize: 14                           
+            font.bold: true
+            Layout.fillWidth: true
         }
 
         Rectangle {
-            id: recentProjView
+            Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.topMargin: 30
-            opacity: 1
-            visible: true
-            color: "#91303030"
-            radius: 12
-            border.width: 10
-//            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.leftMargin: 100
-            anchors.rightMargin: 100
- //           anchors.verticalCenterOffset: 60
+            color: "#1e1e1e"
+            radius: 8
+            border.color: "#444"
+            border.width: 1
 
             ListView {
                 id: recentProjectsList
                 anchors.fill: parent
-                anchors.margins: 20
-                layer.enabled: false
-                clip: true // hides items outside the bounds
-                model: recentProjectsModel
+                anchors.margins: 8
+                clip: true
+                model: projectManager.recentProjects
+                spacing: 4
 
                 delegate: Rectangle {
                     width: recentProjectsList.width
                     height: 60
-                    color: mouseArea.containsMouse ? "#e8f0fe" : "transparent"
+                    color: mouseArea.containsMouse ? "#2e2e2e" : "transparent"
+                    radius: 4
+                    border.color: mouseArea.containsMouse ? "#666" : "transparent"
+                    border.width: 1
 
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 16
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        spacing: 12
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+                            Text {
+                                text: modelData["proj_data"]["proj_name"]
+                                font.pixelSize: 13
+                                font.bold: true
+                                color: "#fff"
+                            }
+                            Text {
+                                text: modelData["proj_data"]["proj_dir"]
+                                font.pixelSize: 10
+                                color: "#999"
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                        }
 
                         Text {
-                            text: model.name
-                            font.pixelSize: 14
-                            font.bold: true
+                            text: modelData["proj_data"]["last_access"]
+                            font.pixelSize: 10
+                            color: "#777"
                         }
-                        Text {
-                            text: model.path
-                            font.pixelSize: 11
-                            color: "#888"
-                        }
-                    }
-
-                    Text {
-                        text: model.lastOpened
-                        anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: "#aaa"
-                        font.pixelSize: 11
                     }
 
                     MouseArea {
                         id: mouseArea
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: () => {
-                            selectedProjectName = model.name;
-                            selectedProjectPath = model.path;
-                            projectLoadConfirmationDialog.open();
+                        onClicked: {
+                            makingNewProject = false
+                            openingRecentProject(modelData["ID"])
                         }
                     }
                 }
 
+                ScrollBar.vertical: ScrollBar {}
             }
-
-            ProjectLoadConfirmationDialog {
-                id: projectLoadConfirmationDialog
-                onConfirmProjectLoad: () => {
-                    console.log("Project Printed;")
-                    confirmedProject(selectedProjectName, selectedProjectPath)
-                }
-            }
-
-
-
         }
+    }
 
+    FileDialog {
+        id: fileDialog
+        title: "Select a Project"
+        nameFilters: ["twty Project (*.twty)", "All files (*)"]
 
+        onAccepted: {
+            console.log("Project selected:", fileDialog.selectedFile)
+            projectLoadConfirmationDialog.open()
+        }
+    }
 
-        ListModel {
-            id: recentProjectsModel
+    CreateProjectDialog {
+      id: createProjectDialog
+      anchors.centerIn: parent
+        onProjectCreated: (path, name) => {
+            console.log("project " + name + " created at " + path)
+            selectedProjectName = name
+            selectedProjectPath = path
+            makingNewProject = true
+            projectLoadConfirmationDialog.open()
+        }
+    }
 
-            ListElement {
-                name: "My App"
-                path: "/home/user/projects/myapp"
-                lastOpened: "2 days ago"
-            }
-            ListElement {
-                name: "Dashboard"
-                path: "/home/user/projects/dash"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
-            ListElement {
-                name: "Blah Blah Blah"
-                path: "/something/something/something"
-                lastOpened: "1 week ago"
-            }
+    ProjectLoadConfirmationDialog {
+      id: projectLoadConfirmationDialog
+      anchors.centerIn: parent
+        onConfirmProjectLoad: {
+            console.log("Project loaded:", selectedProjectName)
+            confirmedProject(selectedProjectName, selectedProjectPath, makingNewProject)
+            projectSelectDialog.close()
+        }
+    }
+    
+    ListModel {
+        id: recentProjectsModel
+
+        ListElement {
+            name: "My App"
+            path: "/home/user/projects/myapp"
+            lastOpened: "2 days ago"
+        }
+        ListElement {
+            name: "Dashboard"
+            path: "/home/user/projects/dash"
+            lastOpened: "1 week ago"
+        }
+        ListElement {
+            name: "Blah Blah Blah"
+            path: "/something/something/something"
+            lastOpened: "1 week ago"
+        }
+        ListElement {
+            name: "Blah Blah Blah"
+            path: "/something/something/something"
+            lastOpened: "1 week ago"
+        }
+        ListElement {
+            name: "Blah Blah Blah"
+            path: "/something/something/something"
+            lastOpened: "1 week ago"
         }
     }
 }

@@ -13,8 +13,8 @@
 int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
   QDirIterator it(":", QDirIterator::Subdirectories);
-  while (it.hasNext())
-    qDebug() << it.next();
+  //  while (it.hasNext())
+  //    qDebug() << it.next();
   app.setApplicationName("BASS");
   app.setOrganizationName("JinGroup");
 
