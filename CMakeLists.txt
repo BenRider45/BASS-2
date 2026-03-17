@@ -9,6 +9,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
+option(BUILD_TESTS "Build unit tests" ON)
 set(SOURCES
     main.cpp
     src/projectmanager.cpp
@@ -27,7 +28,19 @@ set(HEADERS
     src/sharedconstants.h
 )
 
-qt_add_executable(bass_qml ${SOURCES} ${HEADERS})
+# Create a library from the core source files
+add_library(bass_core STATIC ${SOURCES} ${HEADERS})
+
+target_link_libraries(bass_core PRIVATE
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::Multimedia
+)
+
+target_include_directories(bass_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# Create the executable with QML support
+qt_add_executable(bass_qml main.cpp)
 
 qt_add_qml_module(bass_qml
     URI BASS
@@ -52,9 +65,13 @@ qt_add_qml_module(bass_qml
 )
 
 target_link_libraries(bass_qml PRIVATE
+    bass_core
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::Multimedia
 )
 
-target_include_directories(bass_qml PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
