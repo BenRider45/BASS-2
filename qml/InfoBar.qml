@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-
+import Constants 1.0
 Rectangle {
     id: root
     color: "#1e1e1e"
     implicitHeight: 28
 
     property string leftText: projectManager.projectAttached
-        ? projectManager.currentProjectData["proj_data"]["proj_bird"] + " — " + annotationModel.currentFile
+        ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_BIRD_NAME] + " — " + annotationModel.currentFile
         : "No project loaded"
     property string rightText: "Annotations: " + annotationModel.count
         + "  |  Page: " + spectrogramController.navPage

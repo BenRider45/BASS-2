@@ -23,7 +23,8 @@ set(HEADERS
     src/annotationmodel.h
     src/spectrogramprovider.h
     src/filelistmodel.h
-    src/audioplayer.h
+    src/audioplayer.h 
+    src/sharedconstants.h
 )
 
 qt_add_executable(bass_qml ${SOURCES} ${HEADERS})

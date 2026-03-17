@@ -7,6 +7,7 @@
 #include "audioplayer.h"
 #include "filelistmodel.h"
 #include "projectmanager.h"
+#include "sharedconstants.h"
 #include "spectrogramprovider.h"
 #include <QDirIterator>
 
@@ -36,6 +37,9 @@ int main(int argc, char *argv[]) {
   engine.rootContext()->setContextProperty("fileListModel", &fileListModel);
   engine.rootContext()->setContextProperty("audioPlayer", &audioPlayer);
 
+  qmlRegisterSingletonType<constants::SharedConstants>(
+      "Constants", 1, 0, "SharedConstants",
+      &constants::SharedConstants::singletonProvider);
   // Register image provider (engine takes ownership)
   engine.addImageProvider("spectrogram", new SpectrogramProvider);
 

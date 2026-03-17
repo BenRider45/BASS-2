@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtQuick.Window
+import Constants 1.0
 import BASS
 Dialog {
     id: projectSelectDialog
@@ -90,13 +91,13 @@ Dialog {
                             Layout.fillWidth: true
                             spacing: 2
                             Text {
-                                text: modelData["proj_data"]["proj_name"]
+                                text: modelData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_NAME]
                                 font.pixelSize: 13
                                 font.bold: true
                                 color: "#fff"
                             }
                             Text {
-                                text: modelData["proj_data"]["proj_dir"]
+                                text: modelData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_DIR]
                                 font.pixelSize: 10
                                 color: "#999"
                                 elide: Text.ElideRight
@@ -105,7 +106,7 @@ Dialog {
                         }
 
                         Text {
-                            text: modelData["proj_data"]["last_access"]
+                            text: modelData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_LAST_ACCESSED]
                             font.pixelSize: 10
                             color: "#777"
                         }
@@ -117,7 +118,7 @@ Dialog {
                         hoverEnabled: true
                         onClicked: {
                             makingNewProject = false
-                            openingRecentProject(modelData["ID"])
+                            openingRecentProject(modelData[SharedConstants.PROJECT_ID])
                         }
                     }
                 }

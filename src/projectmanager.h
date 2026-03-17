@@ -21,14 +21,6 @@ class ProjectManager : public QObject {
                  currentProjectChanged)
   Q_PROPERTY(QVariantList recentProjects READ recentProjects NOTIFY
                  recentProjectsChanged)
-  Q_PROPERTY(QString PROJECT_DIR MEMBER PROJECT_DIR CONSTANT);
-  Q_PROPERTY(QString PROJECT_BIRD_NAME MEMBER PROJECT_BIRD_NAME CONSTANT);
-  Q_PROPERTY(QString PROJECT_NAME MEMBER PROJECT_NAME CONSTANT);
-  Q_PROPERTY(
-      QString PROJECT_LAST_ACCESSED MEMBER PROJECT_LAST_ACCESSED CONSTANT);
-  Q_PROPERTY(QString PROJECT_CREATE_DATE MEMBER PROJECT_CREATE_DATE CONSTANT);
-  Q_PROPERTY(QString PROJECT_ID MEMBER PROJECT_ID CONSTANT);
-  Q_PROPERTY(QString PROJECT_DATA MEMBER PROJECT_DATA CONSTANT);
 
 public:
   explicit ProjectManager(QObject *parent = nullptr);
@@ -57,14 +49,6 @@ public:
     emit currentProjectChanged();
   }
 
-  const QString META_FILE_NAME = "conf.twty";
-  const QString PROJECT_DIR = "proj_dir";
-  const QString PROJECT_BIRD_NAME = "proj_bird";
-  const QString PROJECT_NAME = "proj_name";
-  const QString PROJECT_LAST_ACCESSED = "last_access";
-  const QString PROJECT_CREATE_DATE = "create_date";
-  const QString PROJECT_ID = "ID";
-  const QString PROJECT_DATA = "proj_data";
 signals:
   void projectLoading(QString projDir);
   void isInitializedChanged();

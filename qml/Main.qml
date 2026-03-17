@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Material
+import Constants 1.0
 import BASS
 ApplicationWindow {
     id: window
@@ -9,7 +10,7 @@ ApplicationWindow {
     height: 800
     visible: true
     title: projectManager.projectAttached
-           ? "BASS — " + projectManager.currentProjectData["proj_data"]["proj_bird"]
+           ? "BASS — " + projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_BIRD_NAME]
            : "BASS — Birdsong Annotations with Spike Sequences"
            
 
@@ -17,8 +18,8 @@ ApplicationWindow {
     Material.accent: Material.Teal
 
     property bool isLoading: false
-    property string projectName: projectManager.projectAttached ? projectManager.currentProjectData["proj_data"]["proj_name"] : "noProject"
-    property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectData["proj_data"]["proj_dir"] : "no/project/dir"
+    property string projectName: projectManager.projectAttached ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_NAME] : "noProject"
+    property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_DIR] : "no/project/dir"
     
     Connections{
       target: projectManager
