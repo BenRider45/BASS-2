@@ -4,15 +4,13 @@ import QtQuick.Layouts
 import QtQuick.Controls.Material
 import Constants 1.0
 import BASS
+
 ApplicationWindow {
     id: window
     width: 1280
     height: 800
     visible: true
-    title: projectManager.projectAttached
-           ? "BASS — " + projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_BIRD_NAME]
-           : "BASS — Birdsong Annotations with Spike Sequences"
-           
+    title: projectManager.projectAttached ? "BASS — " + projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_BIRD_NAME] : "BASS — Birdsong Annotations with Spike Sequences"
 
     Material.theme: Material.Dark
     Material.accent: Material.Teal
@@ -20,61 +18,86 @@ ApplicationWindow {
     property bool isLoading: false
     property string projectName: projectManager.projectAttached ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_NAME] : "noProject"
     property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_DIR] : "no/project/dir"
-    
-    Connections{
-      target: projectManager
-      function onProjectLoading(projectDir) {
-        console.log("Got to project loading")
-        projectSelectWindow.close();
-        // currentProjectDir = projectDir;
-        isLoading = true;
-      } 
 
-      function onProjectLoaded(projectData){
-        console.log("Saw onProjectLoaded Signal");
-        //currentProjectData= projectData;
+    Connections {
+        target: projectManager
+        function onProjectLoading(projectDir) {
+            console.log("Got to project loading");
+            projectSelectWindow.close();
+            // currentProjectDir = projectDir;
+            isLoading = true;
+        }
 
-        // LoadingSplashScreen.close();
-        isLoading = false;
+        function onProjectLoaded(projectData) {
+            console.log("Saw onProjectLoaded Signal");
+            //currentProjectData= projectData;
 
-     }
-      
-     function onCurrentProjectChanged(projectData){
-      console.log("New Project Data: ", projectData);
+            // LoadingSplashScreen.close();
+            isLoading = false;
+        }
 
-     }
+        function onCurrentProjectChanged(projectData) {
+            console.log("New Project Data: ", projectData);
+        }
 
-     function onError(errormsg){
-      console.log("ERROR :( :", errormsg);
+        function onError(errormsg) {
+            console.log("ERROR :( :", errormsg);
+        }
 
-     }
-    
-     function onProjectAttachedChanged(){
-      console.log("projectAttached Changed to ", projectManager.projectAttached);
-      
-     }
-
+        function onProjectAttachedChanged() {
+            console.log("projectAttached Changed to ", projectManager.projectAttached);
+        }
     }
     // ── Menu Bar ──
     menuBar: MenuBar {
         Menu {
             title: "&File"
-            Action { text: "Open Project..."; shortcut: "Ctrl+O"; onTriggered: projectSelectWindow.open() }
-            Action { text: "Save"; shortcut: "Ctrl+S"; onTriggered: annotationModel.save() }
+            Action {
+                text: "Open Project..."
+                shortcut: "Ctrl+O"
+                onTriggered: projectSelectWindow.open()
+            }
+            Action {
+                text: "Save"
+                shortcut: "Ctrl+S"
+                onTriggered: annotationModel.save()
+            }
             MenuSeparator {}
-            Action { text: "Quit"; shortcut: "Ctrl+Q"; onTriggered: Qt.quit() }
+            Action {
+                text: "Quit"
+                shortcut: "Ctrl+Q"
+                onTriggered: Qt.quit()
+            }
         }
         Menu {
             title: "&View"
-            Action { text: "Toggle Files Panel"; shortcut: "Ctrl+1"; onTriggered: leftDrawer.visible ? leftDrawer.close() : leftDrawer.open() }
-            Action { text: "Toggle Control Panel"; shortcut: "Ctrl+2"; onTriggered: rightDrawer.visible ? rightDrawer.close() : rightDrawer.open() }
+            Action {
+                text: "Toggle Files Panel"
+                shortcut: "Ctrl+1"
+                onTriggered: leftDrawer.visible ? leftDrawer.close() : leftDrawer.open()
+            }
+            Action {
+                text: "Toggle Control Panel"
+                shortcut: "Ctrl+2"
+                onTriggered: rightDrawer.visible ? rightDrawer.close() : rightDrawer.open()
+            }
         }
         Menu {
             title: "&Decoder"
-            Action { text: "Run Decoder" }
-            Action { text: "Train Model" }
+            Action {
+                text: "Run Decoder"
+            }
+            Action {
+                text: "Train Model"
+            }
             MenuSeparator {}
-            Action { text: "Decoder Settings..."; onTriggered: { rightDrawer.open(); rightTabBar.currentIndex = 2 } }
+            Action {
+                text: "Decoder Settings..."
+                onTriggered: {
+                    rightDrawer.open();
+                    rightTabBar.currentIndex = 2;
+                }
+            }
         }
         Menu {
             title: "&Help"
@@ -95,7 +118,9 @@ ApplicationWindow {
         height: window.height - window.menuBar.height
         y: window.menuBar.height
 
-        background: Rectangle { color: "#2b2b2b" }
+        background: Rectangle {
+            color: "#2b2b2b"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -104,8 +129,12 @@ ApplicationWindow {
             TabBar {
                 id: leftTabBar
                 Layout.fillWidth: true
-                TabButton { text: "Files" }
-                TabButton { text: "Clusters" }
+                TabButton {
+                    text: "Files"
+                }
+                TabButton {
+                    text: "Clusters"
+                }
             }
 
             StackLayout {
@@ -129,7 +158,9 @@ ApplicationWindow {
         height: window.height - window.menuBar.height
         y: window.menuBar.height
 
-        background: Rectangle { color: "#2b2b2b" }
+        background: Rectangle {
+            color: "#2b2b2b"
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -138,9 +169,15 @@ ApplicationWindow {
             TabBar {
                 id: rightTabBar
                 Layout.fillWidth: true
-                TabButton { text: "Control" }
-                TabButton { text: "Player" }
-                TabButton { text: "Settings" }
+                TabButton {
+                    text: "Control"
+                }
+                TabButton {
+                    text: "Player"
+                }
+                TabButton {
+                    text: "Settings"
+                }
             }
 
             StackLayout {
@@ -173,7 +210,7 @@ ApplicationWindow {
             Keys.onDownPressed: spectrogramController.setThreshold(spectrogramController.threshold - 0.01)
             Keys.onReturnPressed: promptDialog.open()
 
-            Keys.onPressed: function(event) {
+            Keys.onPressed: function (event) {
                 switch (event.key) {
                 case Qt.Key_D:
                     spectrogramView.cursorX += spectrogramView.cursorStep;
@@ -233,53 +270,50 @@ ApplicationWindow {
         }
 
         InfoBar {
-          Layout.fillWidth: true
-          Layout.fillHeight: true
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
     }
 
     // ── Dialogs ──
     ProjectInitDialog {
         id: projectInitDialog
-      }
-
-      ProjectSelectWindow{
-        
-        anchors.centerIn: parent
-        id: projectSelectWindow
-        onConfirmedProject: function(name, path, makingNewProject){
-          //projectName = name;
-          console.log("Path: " + path);
-          //projectDir = path;
-
-          if(makingNewProject){
-            console.log("Making New Project");
-            projectManager.initProject(name, path, "Tweety Bird");
-
-          }else{
-            console.log("Opening not new project")
-            projectManager.loadProject(path);
-          }
-
-        }
-
-        onOpeningRecentProject: function(UID){     
-          console.log("Opening Recent Project");
-          projectManager.loadRecentProject(UID);
-        }
-      }
-
-    LoadingSplashScreen{
-      id: loadingScreen
-  
-      visible: isLoading
     }
-    
+
+    ProjectSelectWindow {
+        id: projectSelectWindow
+
+        anchors.centerIn: parent
+        onConfirmedProject: function (name, path, makingNewProject) {
+            //projectName = name;
+            console.log("Path: " + path);
+            //projectDir = path;
+
+            if (makingNewProject) {
+                console.log("Making New Project");
+                projectManager.initProject(name, path, "Tweety Bird");
+            } else {
+                console.log("Opening not new project");
+                projectManager.loadProject(path);
+            }
+        }
+
+        onOpeningRecentProject: function (UID) {
+            console.log("Opening Recent Project");
+            projectManager.loadRecentProject(UID);
+        }
+    }
+
+    LoadingSplashScreen {
+        id: loadingScreen
+
+        visible: isLoading
+    }
 
     PromptDialog {
         id: promptDialog
-        onLabelAccepted: function(label) {
-            annotationModel.addFrame(spectrogramView.cursorX, spectrogramView.cursorX + 100, label)
+        onLabelAccepted: function (label) {
+            annotationModel.addFrame(spectrogramView.cursorX, spectrogramView.cursorX + 100, label);
         }
     }
 
@@ -313,11 +347,10 @@ ApplicationWindow {
         }
     }
 
-      
     // Show project init on first launch
     Component.onCompleted: {
-      //if (!projectManager.isInitialized) {
-            projectSelectWindow.open();
+        //if (!projectManager.isInitialized) {
+        projectSelectWindow.open();
         //}
     }
 }

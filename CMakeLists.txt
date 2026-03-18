@@ -1,12 +1,16 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.19)
 project(BASS_QML VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick QuickControls2 Multimedia)
 
+
+set(QT_QML_GENERATE_QMLLS_INI ON)
+
+qt_policy(SET QTP0004 NEW)
 qt_standard_project_setup(REQUIRES 6.5)
 
 option(BUILD_TESTS "Build unit tests" ON)
@@ -17,6 +21,7 @@ set(SOURCES
     src/spectrogramprovider.cpp
     src/filelistmodel.cpp
     src/audioplayer.cpp
+    src/metamanager.cpp
 )
 
 set(HEADERS
@@ -26,6 +31,7 @@ set(HEADERS
     src/filelistmodel.h
     src/audioplayer.h 
     src/sharedconstants.h
+    src/metamanager.h
 )
 
 # Create a library from the core source files
@@ -35,6 +41,7 @@ target_link_libraries(bass_core PRIVATE
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::Multimedia
+    Qt6::Core
 )
 
 target_include_directories(bass_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)

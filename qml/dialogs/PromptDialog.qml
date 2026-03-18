@@ -14,13 +14,13 @@ Dialog {
     signal labelAccepted(string label)
 
     onAccepted: {
-        labelAccepted(labelField.text)
-        labelField.text = ""
+        labelAccepted(labelField.text);
+        labelField.text = "";
     }
 
     onOpened: {
-        labelField.forceActiveFocus()
-        labelField.selectAll()
+        labelField.forceActiveFocus();
+        labelField.selectAll();
     }
 
     ColumnLayout {

@@ -8,20 +8,17 @@ Rectangle {
     opacity: 0.951
     color: "#4d4d4d"
     radius: 50
-    signal projectLoaded()
-    Column{
+    signal projectLoaded
+    Column {
         id: column
         anchors.fill: parent
-        Text{
+        Text {
             text: "Loading..."
             anchors.topMargin: 50
             horizontalAlignment: Text.AlignHCenter
             anchors.horizontalCenter: parent.horizontalCenter
         }
-
-
     }
-
 
     BusyIndicator {
         id: busyIndicator
@@ -35,8 +32,7 @@ Rectangle {
         repeat: false
         running: splashScreen.visible
         onTriggered: {
-            projectLoaded()
+            projectLoaded();
         }
     }
-
 }

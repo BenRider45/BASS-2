@@ -8,7 +8,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
-
+find_package(Qt6 REQUIRED COMPONENTS Core)
 # Collect c++ source files
 file(GLOB CXX_FILES "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 add_executable(unit_tests ${CXX_FILES})
@@ -18,6 +18,7 @@ target_link_libraries(unit_tests
     PRIVATE
     gtest_main
     bass_core
+    Qt6::Core
 )
 
 # include directories (including where GoogleTest is built)

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Window
 import Constants 1.0
 import BASS
+
 Dialog {
     id: projectSelectDialog
     title: "Select or Create Project"
@@ -20,7 +21,6 @@ Dialog {
     signal confirmedProject(string projName, string projPath, bool newProject)
     signal openingRecentProject(string UID)
 
-    
     contentItem: ColumnLayout {
         spacing: 20
 
@@ -53,7 +53,7 @@ Dialog {
         }
         Text {
             text: "Recent Projects"
-            font.pixelSize: 14                           
+            font.pixelSize: 14
             font.bold: true
             Layout.fillWidth: true
         }
@@ -117,8 +117,8 @@ Dialog {
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
-                            makingNewProject = false
-                            openingRecentProject(modelData[SharedConstants.PROJECT_ID])
+                            makingNewProject = false;
+                            openingRecentProject(modelData[SharedConstants.PROJECT_ID]);
                         }
                     }
                 }
@@ -134,33 +134,33 @@ Dialog {
         nameFilters: ["twty Project (*.twty)", "All files (*)"]
 
         onAccepted: {
-            console.log("Project selected:", fileDialog.selectedFile)
-            projectLoadConfirmationDialog.open()
+            console.log("Project selected:", fileDialog.selectedFile);
+            projectLoadConfirmationDialog.open();
         }
     }
 
     CreateProjectDialog {
-      id: createProjectDialog
-      anchors.centerIn: parent
+        id: createProjectDialog
+        anchors.centerIn: parent
         onProjectCreated: (path, name) => {
-            console.log("project " + name + " created at " + path)
-            selectedProjectName = name
-            selectedProjectPath = path
-            makingNewProject = true
-            projectLoadConfirmationDialog.open()
+            console.log("project " + name + " created at " + path);
+            selectedProjectName = name;
+            selectedProjectPath = path;
+            makingNewProject = true;
+            projectLoadConfirmationDialog.open();
         }
     }
 
     ProjectLoadConfirmationDialog {
-      id: projectLoadConfirmationDialog
-      anchors.centerIn: parent
+        id: projectLoadConfirmationDialog
+        anchors.centerIn: parent
         onConfirmProjectLoad: {
-            console.log("Project loaded:", selectedProjectName)
-            confirmedProject(selectedProjectName, selectedProjectPath, makingNewProject)
-            projectSelectDialog.close()
+            console.log("Project loaded:", selectedProjectName);
+            confirmedProject(selectedProjectName, selectedProjectPath, makingNewProject);
+            projectSelectDialog.close();
         }
     }
-    
+
     ListModel {
         id: recentProjectsModel
 
