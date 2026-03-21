@@ -1,0 +1,36 @@
+#include "metamanager.h"
+#include <QDir>
+#include <QStringList>
+#include <gtest/gtest.h>
+class TestMetaClass : public MetaManager {
+public:
+  TestMetaClass(int foo, QString MetaFilename, QString DirName)
+      : _foo(foo), _MetaFileName(MetaFilename), _DirName(DirName) {}
+
+  int _foo;
+  QString _MetaFileName;
+  QString _DirName;
+};
+class MetaManagerTest : public testing::Test {
+protected:
+  void SetUp() override {}
+
+  void TearDown() override {}
+};
+
+TEST_F(MetaManagerTest, initsFromstdFilesystem) {
+  QDir tempDir = std::filesystem::temp_directory_path();
+
+  TestMetaClass tmc(5, "TestMetaName", "DirName");
+  tempDir.mkdir(tmc._DirName);
+
+  tempDir = tempDir.filePath(tmc._DirName);
+
+  tmc.createMetaFile(tempDir, tmc._MetaFileName);
+  EXPECT_EQ(tmc.VerifyMetaFileExistence(tempDir), true);
+}
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

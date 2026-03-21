@@ -29,7 +29,7 @@ public:
 
   static inline const QString prop{"MY_PROPERTY_TEXT"};
   static inline const QString META_FILE_EXTENSION{".twty"};
-  static inline const QString PROJECT_META_FILE_NAME{"conf.twty"};
+  static inline const QString PROJECT_META_FILE_NAME{"conf"};
   static inline const QString PROJECT_DIR{"proj_dir"};
   static inline const QString PROJECT_BIRD_NAME{"proj_bird"};
   static inline const QString PROJECT_NAME{"proj_name"};

@@ -1,6 +1,7 @@
 #ifndef PROJECTMANAGER_H
 #define PROJECTMANAGER_H
 
+#include "metamanager.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -9,8 +10,7 @@
 #include <QQmlEngine>
 #include <QString>
 #include <filesystem>
-
-class ProjectManager : public QObject {
+class ProjectManager : public QObject, public MetaManager {
   Q_OBJECT
   Q_PROPERTY(QString birdName READ birdName NOTIFY projectLoaded)
   Q_PROPERTY(QString projectDir READ projectDir NOTIFY projectLoaded)
@@ -73,11 +73,11 @@ private:
   void updateRecentProjectsFile();
   QString buildProjectMetaFile(const QString &projDir);
 
-  bool findMetaFile(const QString &ProjDir);
-  bool modMetaFile(const QString &path, const QStringList &key,
-                   const QStringList &value, bool addValueIfNeeded = false);
-  QString getMetaDataPath(const QString &projectDirectory);
-  QJsonObject extractMetaDataContent(const QString &metaFilePath);
+  // bool findMetaFile(const QString &ProjDir);
+  //  bool modMetaFile(const QString &path, const QStringList &key,
+  //                   const QStringList &value, bool addValueIfNeeded = false);
+  //   QString getMetaDataPath(const QString &projectDirectory);
+  //    QJsonObject extractMetaDataContent(const QString &metaFilePath);
 };
 
 #endif
