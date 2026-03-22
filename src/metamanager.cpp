@@ -1,7 +1,9 @@
 #include "metamanager.h"
 #include "sharedconstants.h"
+#include <QVariant>
 #include <iostream>
 #include <ranges>
+#include <type_traits>
 namespace {
 
 void debug_printJsonObject(QJsonObject obj) {
@@ -11,8 +13,9 @@ void debug_printJsonObject(QJsonObject obj) {
 }
 
 } // namespace
+namespace MetaManager {
 
-QJsonObject MetaManager::extractMetaDataContent(QString metaFilePath) {
+QJsonObject extractMetaDataContent(QString metaFilePath) {
 
   QByteArray data;
   qDebug() << "Extracting Meta Data from " << metaFilePath;
@@ -28,7 +31,7 @@ QJsonObject MetaManager::extractMetaDataContent(QString metaFilePath) {
   }
 }
 
-bool MetaManager::createMetaFile(QDir directory, QString metaFileName) {
+bool createMetaFile(QDir directory, QString metaFileName) {
 
   QDir dir(directory);
   assert(!VerifyMetaFileExistence(directory));
@@ -46,9 +49,8 @@ bool MetaManager::createMetaFile(QDir directory, QString metaFileName) {
   }
 }
 
-bool MetaManager::modMetaFile(QString metaFilePath, const QStringList &keys,
-                              const QVariantList &values,
-                              bool addValuesIfNeeded) {
+bool modMetaFile(QString metaFilePath, const QStringList &keys,
+                 const QVariantList &values, bool addValuesIfNeeded) {
 
   assert(keys.length() == values.length());
   QJsonDocument doc;
@@ -64,8 +66,8 @@ bool MetaManager::modMetaFile(QString metaFilePath, const QStringList &keys,
 
   for (auto &&[k, v] : std::views::zip(keys, values)) {
     if (addValuesIfNeeded || obj.keys().contains(k)) {
-      std::cerr << "Adding values " << v.toString().toCFString() << "for keys "
-                << k.toCFString() << "\n";
+      std::cerr << "Adding values " << v.toJsonValue().toString().toStdString()
+                << "for keys " << k.toStdString() << "\n";
       obj[k] = v.toJsonValue();
     }
   }
@@ -78,7 +80,7 @@ bool MetaManager::modMetaFile(QString metaFilePath, const QStringList &keys,
   return true;
 }
 
-bool MetaManager::VerifyMetaFileExistence(QDir directory) {
+bool VerifyMetaFileExistence(QDir directory) {
   QStringList lst;
   lst << "*" + constants::SharedConstants::META_FILE_EXTENSION;
   std::cerr << "lst: " << lst[0].toStdString() << "\n";
@@ -92,10 +94,12 @@ bool MetaManager::VerifyMetaFileExistence(QDir directory) {
   return entryLst.length() > 0;
 }
 
-QString MetaManager::getMetaFilePath(QDir path, QString fileName) {
+QString getMetaFilePath(QDir path, QString fileName) {
   // Get meta file path of specific name
   assert(
       path.exists(fileName + constants::SharedConstants::META_FILE_EXTENSION));
   return path.filePath(fileName +
                        constants::SharedConstants::META_FILE_EXTENSION);
 }
+
+} // namespace MetaManager

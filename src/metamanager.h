@@ -5,19 +5,40 @@
 #include <QStringList>
 #include <QVariantList>
 
-class MetaManager {
-public:
-  //  MetaManager(MetaManager &&) = default;
-  //  MetaManager(const MetaManager &) = default;
-  //  MetaManager &operator=(MetaManager &&) = default;
-  //  MetaManager &operator=(const MetaManager &) = default;
-  //  ~MetaManager();
+namespace MetaManager {
+//  MetaManager(MetaManager &&) = default;
+//  MetaManager(const MetaManager &) = default;
+//  MetaManager &operator=(MetaManager &&) = default;
+//  MetaManager &operator=(const MetaManager &) = default;
+//  ~MetaManager();
 
-  bool VerifyMetaFileExistence(QDir dir);
-  QJsonObject extractMetaDataContent(QString metaFilePath);
-  QString getMetaFilePath(QDir path, QString metaFileName);
-  bool modMetaFile(QString metaFilePath, const QStringList &keys,
-                   const QVariantList &values, bool addValuesIfNeeded = false);
+template <typename T>
+concept Variantable = requires(T a) { std::is_convertible<QVariant, T>(); };
 
-  bool createMetaFile(QDir directory, QString metaFileName);
+template <typename T> struct RetrievedObject {
+  T obj;
+  bool success;
 };
+
+bool VerifyMetaFileExistence(QDir dir);
+QJsonObject extractMetaDataContent(QString metaFilePath);
+QString getMetaFilePath(QDir path, QString metaFileName);
+bool modMetaFile(QString metaFilePath, const QStringList &keys,
+                 const QVariantList &values, bool addValuesIfNeeded = false);
+
+bool createMetaFile(QDir directory, QString metaFileName);
+
+template <Variantable T>
+RetrievedObject<T> retrieveData(QString MetaFilePath, QString key) {
+  QJsonObject metaData = extractMetaDataContent(MetaFilePath);
+  bool success = metaData.keys().contains(key);
+  RetrievedObject<T> retrievedObj;
+  retrievedObj.success = success;
+  if (!success) {
+    retrievedObj.obj = T();
+  } else {
+    retrievedObj.obj = qvariant_cast<T>(metaData[key].toVariant());
+  }
+  return retrievedObj;
+}
+}; // namespace MetaManager

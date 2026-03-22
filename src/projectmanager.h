@@ -10,7 +10,7 @@
 #include <QQmlEngine>
 #include <QString>
 #include <filesystem>
-class ProjectManager : public QObject, public MetaManager {
+class ProjectManager : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString birdName READ birdName NOTIFY projectLoaded)
   Q_PROPERTY(QString projectDir READ projectDir NOTIFY projectLoaded)

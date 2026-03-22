@@ -2,7 +2,8 @@
 #include <QDir>
 #include <QStringList>
 #include <gtest/gtest.h>
-class TestMetaClass : public MetaManager {
+
+class TestMetaClass {
 public:
   TestMetaClass(int foo, QString MetaFilename, QString DirName)
       : _foo(foo), _MetaFileName(MetaFilename), _DirName(DirName) {}
@@ -42,30 +43,49 @@ TEST_F(MetaManagerTest, initsFromstdFilesystem) {
 
   TestMetaClass tmc(5, test_name, "DirName");
 
-  tmc.createMetaFile(projDirPath, tmc._MetaFileName);
-  EXPECT_EQ(tmc.VerifyMetaFileExistence(projDirPath), true);
+  MetaManager::createMetaFile(projDirPath, tmc._MetaFileName);
+  EXPECT_EQ(MetaManager::VerifyMetaFileExistence(projDirPath), true);
 }
 
 TEST_F(MetaManagerTest, readWriteItemstoMetaFile) {
 
   TestMetaClass tmc(5, "TestMetaName", "DirName");
 
-  tmc.createMetaFile(projDirPath, tmc._MetaFileName);
-  QString metaFilePath = tmc.getMetaFilePath(projDirPath, tmc._MetaFileName);
+  MetaManager::createMetaFile(projDirPath, tmc._MetaFileName);
+  QString metaFilePath =
+      MetaManager::getMetaFilePath(projDirPath, tmc._MetaFileName);
 
   QStringList keys;
   keys << "name" << "number";
   QVariantList values;
   values << tmc._MetaFileName << tmc._foo;
 
-  tmc.modMetaFile(metaFilePath, keys, values, true);
-  QJsonObject fileData = tmc.extractMetaDataContent(metaFilePath);
+  MetaManager::modMetaFile(metaFilePath, keys, values, true);
+  QJsonObject fileData = MetaManager::extractMetaDataContent(metaFilePath);
 
   QJsonDocument doc(fileData);
 
   QByteArray jsonData = doc.toJson(QJsonDocument::Indented);
   std::cerr << jsonData.constData() << "\n";
   EXPECT_EQ(fileData.count(), 2);
+}
+
+TEST_F(MetaManagerTest, readWriteArraytoMetaFile) {
+  QStringList thingsToWrite = {"Things", "to", "Write", "into", "One", "Array"};
+  QString metaFileName = "meta_file";
+  MetaManager::createMetaFile(projDirPath, metaFileName);
+  QString metaFilePath =
+      MetaManager::getMetaFilePath(projDirPath, metaFileName);
+
+  QStringList keys = {"Array"};
+  QVariantList values = {thingsToWrite};
+
+  MetaManager::modMetaFile(metaFilePath, keys, values, true);
+
+  MetaManager::RetrievedObject<QStringList> array =
+      MetaManager::retrieveData<QStringList>(metaFilePath, keys[0]);
+  EXPECT_TRUE(array.success);
+  EXPECT_EQ(array.obj.length(), thingsToWrite.length());
 }
 
 int main(int argc, char **argv) {

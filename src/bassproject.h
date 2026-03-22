@@ -1,30 +1,22 @@
 #ifndef BASSPROJECT_H
 #define BASSPROJECT_H
 
+#include <QDateTime>
+#include <QDir>
 #include <QJsonObject>
-#include <QObject>
-#include <QQMLEngine>
 #include <QString>
-#include <filesystem>
-class BassProject : public QObject {
-  Q_OBJECT
-  Q_PROPERTY(QJsonObject projectMetaData READ projectMetaData NOTIFY
-                 projectMetaDataChanged)
+#include <QUuid>
+
+class BassProject {
 public:
-  explicit BassProject(std::filesystem::path projDir, QString projName,
-                       QObject *parent = nullptr);
-  explicit BassProject(QJsonObject pdata);
-  QJsonObject projectMetaData;
-signals:
-  void projectMetaDataChanged();
-  void projectInitialized(QJsonObject projectMetaData);
+  explicit BassProject(QJsonObject pMetaData);
+  ~BassProject(); // Update project's metafiles
 
 private:
-  void initProject();
-  std::filesystem::path _projectDir;
-  std::filesystem::path _wavDir;
-  std::filesystem::path _cacheDir;
-  std::filesystem::path _logDir;
+  QDir _projectDir;
+  QUuid _projectID;
+  QDateTime _timeCreated;
+  QDateTime _lastAccessed;
 };
 
 #endif // BASSPROJECT_H

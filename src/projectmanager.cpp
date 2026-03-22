@@ -145,7 +145,7 @@ void ProjectManager::initProject(const QString &projectDir,
                                  const QString &projectName,
                                  const QString &birdName) {
 
-  if (VerifyMetaFileExistence(projectDir)) {
+  if (MetaManager::VerifyMetaFileExistence(projectDir)) {
     emit error("Cannot create a project within another project!");
     return;
   }
@@ -165,10 +165,10 @@ void ProjectManager::initProject(const QString &projectDir,
 
   qDebug() << "Got to init projet\n";
 
-  if (!modMetaFile(MetaFilePath, keys, values, true)) {
+  if (!MetaManager::modMetaFile(MetaFilePath, keys, values, true)) {
     emit error("Error in building .twty file");
   }
-  // buildProjectDirectory(projectDir)
+  buildProjectDirectory(projectDir);
   loadProject(projectDir);
 }
 
@@ -178,7 +178,7 @@ void ProjectManager::loadProject(const QString &projDir) {
   // if found, update access date value, allocate class QJSONObject with project
   // data
 
-  QString metaDataPath = getMetaFilePath(
+  QString metaDataPath = MetaManager::getMetaFilePath(
       projDir, constants::SharedConstants::PROJECT_META_FILE_NAME);
   // find in recent projects, if in recent projects update last accessed date
   qDebug() << "metaDataPath: " << metaDataPath.toStdString() << "\n";
@@ -186,9 +186,9 @@ void ProjectManager::loadProject(const QString &projDir) {
   QVariantList vals;
   keys << constants::SharedConstants::PROJECT_LAST_ACCESSED;
   vals << QDateTime::currentDateTimeUtc().toString();
-  modMetaFile(metaDataPath, keys, vals, false);
+  MetaManager::modMetaFile(metaDataPath, keys, vals, false);
 
-  QJsonObject metaData = extractMetaDataContent(metaDataPath);
+  QJsonObject metaData = MetaManager::extractMetaDataContent(metaDataPath);
   debug_printJsonObject(metaData);
   emit projectLoading(QString(metaData[constants::SharedConstants::PROJECT_DATA]
                                       [constants::SharedConstants::PROJECT_NAME]
@@ -268,8 +268,8 @@ void ProjectManager::buildProjectDirectory(const QString &projdir) {
 
 QString ProjectManager::buildProjectMetaFile(const QString &projDir) {
   QDir dir(projDir);
-  assert(createMetaFile(projDir,
-                        constants::SharedConstants::PROJECT_META_FILE_NAME));
+  assert(MetaManager::createMetaFile(
+      projDir, constants::SharedConstants::PROJECT_META_FILE_NAME));
   QJsonObject obj;
   QJsonObject container;
 
@@ -285,10 +285,11 @@ QString ProjectManager::buildProjectMetaFile(const QString &projDir) {
   values << QUuid::createUuid().toString(QUuid::WithoutBraces);
   values.append(container);
 
-  modMetaFile(
-      getMetaFilePath(m_projectDir,
-                      constants::SharedConstants::PROJECT_META_FILE_NAME),
+  MetaManager::modMetaFile(
+      MetaManager::getMetaFilePath(
+          projDir, constants::SharedConstants::PROJECT_META_FILE_NAME),
       keys, values, true);
 
-  return dir.filePath(constants::SharedConstants::PROJECT_META_FILE_NAME);
+  return dir.filePath(constants::SharedConstants::PROJECT_META_FILE_NAME +
+                      constants::SharedConstants::META_FILE_EXTENSION);
 }
