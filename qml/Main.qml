@@ -10,14 +10,14 @@ ApplicationWindow {
     width: 1280
     height: 800
     visible: true
-    title: projectManager.projectAttached ? "BASS — " + projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_BIRD_NAME] : "BASS — Birdsong Annotations with Spike Sequences"
+    title: projectManager.projectAttached ? "BASS — " + projectManager.projectMetadata.projectName : "BASS — Birdsong Annotations with Spike Sequences"
 
     Material.theme: Material.Dark
     Material.accent: Material.Teal
 
     property bool isLoading: false
-    property string projectName: projectManager.projectAttached ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_NAME] : "noProject"
-    property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_DIR] : "no/project/dir"
+    property string projectName: projectManager.projectAttached ? projectManager.projectMetadata.projectName : "noProject"
+    property string currentProjectDir: projectManager.projectAttached ? projectManager.projectDir.path() : "no/project/dir"
 
     Connections {
         target: projectManager

@@ -7,16 +7,32 @@
 #include <QString>
 #include <QUuid>
 
-class BassProject {
-public:
-  explicit BassProject(QJsonObject pMetaData);
-  ~BassProject(); // Update project's metafiles
+namespace bassproject {
 
-private:
-  QDir _projectDir;
-  QUuid _projectID;
-  QDateTime _timeCreated;
-  QDateTime _lastAccessed;
+struct ProjectMetaPackage {
+  QDir projectDir;
+  QUuid projectID;
+  QDateTime timeCreated;
+  QDateTime lastAccessed;
+  QString projectName;
+  QString birdName;
 };
 
+} // namespace bassproject
+
+Q_DECLARE_METATYPE(bassproject::ProjectMetaPackage)
+
+class BassProject {
+public:
+  explicit BassProject();
+  explicit BassProject(bassproject::ProjectMetaPackage metaPackage);
+  ~BassProject() =
+      default; // Update project's metafiles on destruction if needed
+  bool wasDefaultConstructed();
+  bassproject::ProjectMetaPackage _projMetaData;
+
+private:
+  bool _defaultConstructed;
+};
+// namespace bassproject
 #endif // BASSPROJECT_H

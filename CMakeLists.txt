@@ -22,6 +22,8 @@ set(SOURCES
     src/filelistmodel.cpp
     src/audioplayer.cpp
     src/metamanager.cpp
+    src/projectFactory.cpp
+    src/bassproject.cpp
 )
 
 set(HEADERS
@@ -32,6 +34,11 @@ set(HEADERS
     src/audioplayer.h 
     src/sharedconstants.h
     src/metamanager.h
+    src/projectFactory.h 
+    src/bassproject.h 
+    src/errorinator.h
+    src/result.h 
+    src/serializationtraits.h
 )
 
 # Create a library from the core source files

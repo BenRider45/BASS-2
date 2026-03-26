@@ -3,7 +3,6 @@
 #include <QVariant>
 #include <iostream>
 #include <ranges>
-#include <type_traits>
 namespace {
 
 void debug_printJsonObject(QJsonObject obj) {
@@ -35,7 +34,8 @@ bool createMetaFile(QDir directory, QString metaFileName) {
 
   QDir dir(directory);
   assert(!VerifyMetaFileExistence(directory));
-  QJsonDocument doc;
+  QJsonObject emptyObj;
+  QJsonDocument doc(emptyObj);
   QFile file = QFile(dir.filePath(
       metaFileName + constants::SharedConstants::META_FILE_EXTENSION));
 
@@ -49,36 +49,39 @@ bool createMetaFile(QDir directory, QString metaFileName) {
   }
 }
 
-bool modMetaFile(QString metaFilePath, const QStringList &keys,
-                 const QVariantList &values, bool addValuesIfNeeded) {
-
-  assert(keys.length() == values.length());
-  QJsonDocument doc;
-
-  QFile file(metaFilePath);
-
-  if (file.open(QIODevice::ReadOnly)) {
-    QByteArray data = file.readAll();
-    doc = QJsonDocument::fromJson(data);
-  }
-  file.close();
-  QJsonObject obj = doc.object();
-
-  for (auto &&[k, v] : std::views::zip(keys, values)) {
-    if (addValuesIfNeeded || obj.keys().contains(k)) {
-      std::cerr << "Adding values " << v.toJsonValue().toString().toStdString()
-                << "for keys " << k.toStdString() << "\n";
-      obj[k] = v.toJsonValue();
-    }
-  }
-  qDebug() << "OBJECT AFTER ADDING STUFF\n";
-  debug_printJsonObject(obj);
-  file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-  QJsonDocument newDoc(obj);
-  file.write(newDoc.toJson());
-  file.close();
-  return true;
-}
+// bool modMetaFile(QString metaFilePath, const QStringList &keys,
+//                  const QVariantList &values, bool addValuesIfNeeded) {
+//
+//   assert(keys.length() == values.length());
+//   QJsonDocument doc;
+//
+//   QFile file(metaFilePath);
+//
+//   if (file.open(QIODevice::ReadOnly)) {
+//     QByteArray data = file.readAll();
+//     doc = QJsonDocument::fromJson(data);
+//   }
+//   file.close();
+//   QJsonObject obj = doc.object();
+//   for (auto &&[k, v] : std::views::zip(keys, values)) {
+//     if (addValuesIfNeeded || obj.keys().contains(k)) {
+//       std::cerr << "v typename" << v.typeName() << "\n;";
+//       std::cerr << "canConvert: " << v.canConvert(QMetaType::QString) <<
+//       "\n";
+//
+//       qDebug() << "Adding values " << v.toString() << "for keys "
+//                << k.toStdString() << "\n";
+//       obj[k] = QJsonValue::fromVariant(v);
+//     }
+//   }
+//   qDebug() << "OBJECT AFTER ADDING STUFF\n";
+//   debug_printJsonObject(obj);
+//   file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+//   QJsonDocument newDoc(obj);
+//   file.write(newDoc.toJson());
+//   file.close();
+//   return true;
+// }
 
 bool VerifyMetaFileExistence(QDir directory) {
   QStringList lst;
@@ -103,3 +106,4 @@ QString getMetaFilePath(QDir path, QString fileName) {
 }
 
 } // namespace MetaManager
+  //

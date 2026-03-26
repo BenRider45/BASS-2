@@ -5,6 +5,7 @@
 
 #include "annotationmodel.h"
 #include "audioplayer.h"
+#include "bassproject.h"
 #include "filelistmodel.h"
 #include "projectmanager.h"
 #include "sharedconstants.h"
@@ -40,6 +41,7 @@ int main(int argc, char *argv[]) {
   qmlRegisterSingletonType<constants::SharedConstants>(
       "Constants", 1, 0, "SharedConstants",
       &constants::SharedConstants::singletonProvider);
+  qmlRegisterType<bassproject::ProjectMetaPackage>("BASS", 1, 0, "ProjectMetaPackage");
   // Register image provider (engine takes ownership)
   engine.addImageProvider("spectrogram", new SpectrogramProvider);
 

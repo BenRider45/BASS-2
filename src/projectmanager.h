@@ -1,6 +1,7 @@
 #ifndef PROJECTMANAGER_H
 #define PROJECTMANAGER_H
 
+#include "bassproject.h"
 #include "metamanager.h"
 #include <QFile>
 #include <QJsonArray>
@@ -9,16 +10,15 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QString>
-#include <filesystem>
 class ProjectManager : public QObject {
   Q_OBJECT
-  Q_PROPERTY(QString birdName READ birdName NOTIFY projectLoaded)
-  Q_PROPERTY(QString projectDir READ projectDir NOTIFY projectLoaded)
+
+  Q_PROPERTY(
+      bassproject::ProjectMetaPackage projectMetadata READ projectMetadata)
+
   Q_PROPERTY(bool isInitialized READ isInitialized NOTIFY isInitializedChanged)
   Q_PROPERTY(bool projectAttached READ projectAttached WRITE setProjectAttached
                  NOTIFY projectAttachedChanged)
-  Q_PROPERTY(QVariantMap currentProjectData READ currentProjectData NOTIFY
-                 currentProjectChanged)
   Q_PROPERTY(QVariantList recentProjects READ recentProjects NOTIFY
                  recentProjectsChanged)
 
@@ -31,6 +31,8 @@ public:
   bool isInitialized() const;
   bool projectAttached() const;
   QVariantMap currentProjectData() const;
+  bassproject::ProjectMetaPackage projectMetadata() const;
+
   QVariantList recentProjects() const;
   void buildProjectDirectory(const QString &ProjDir);
   Q_INVOKABLE void initProject(const QString &projectDir,
@@ -44,14 +46,11 @@ public:
     m_projectAttached = val;
     emit projectAttachedChanged();
   }
-  void setCurrentProjectData(QJsonObject ProjData) {
-    m_currentProjectData = ProjData;
-    emit currentProjectChanged();
-  }
 
 signals:
   void projectLoading(QString projDir);
   void isInitializedChanged();
+  void projectMetadataChanged();
   void projectAttachedChanged();
   void projectLoaded();
   void projectOpened();
@@ -63,15 +62,16 @@ private:
   QString m_birdName;
   QString m_projectDir;
   QString m_wavDir;
-  QJsonObject m_currentProjectData;
   QJsonArray m_recentProjects;
   bool m_isInitialized = false;
   bool m_projectAttached = false;
-  void buildProjectDirectory(std::filesystem::path projdir);
+  std::unique_ptr<BassProject> m_currentProject;
   bool searchForProject();
   void updateRecentProjects(QJsonObject projData);
   void updateRecentProjectsFile();
-  QString buildProjectMetaFile(const QString &projDir);
+  void setCurrentProject(std::unique_ptr<BassProject> bassProj);
+  QJsonObject
+  fromProjectMetaToJson(bassproject::ProjectMetaPackage metaPackage);
 
   // bool findMetaFile(const QString &ProjDir);
   //  bool modMetaFile(const QString &path, const QStringList &key,

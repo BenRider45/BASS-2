@@ -142,7 +142,7 @@ Dialog {
     CreateProjectDialog {
         id: createProjectDialog
         anchors.centerIn: parent
-        onProjectCreated: (path, name) => {
+        onProjectCreated: (name, path) => {
             console.log("project " + name + " created at " + path);
             selectedProjectName = name;
             selectedProjectPath = path;

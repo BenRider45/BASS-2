@@ -1,24 +1,11 @@
 #include "bassproject.h"
 #include <QDateTime>
-BassProject::BassProject(std::filesystem::path projDir, QString projName,
-                         QObject *parent)
-    : QObject(parent) {
-  projectMetaData["proj_name"] = projName;
-  projectMetaData["proj_directory"] = QString::fromUtf8(projDir.u8string());
-  projectMetaData["date_created"] = QDateTime::currentDateTimeUtc().toString();
 
-  initProject();
+BassProject::BassProject(bassproject::ProjectMetaPackage metaPackage)
+    : _projMetaData(metaPackage), _defaultConstructed(false) {
+  // Do initializtion of all sub-modules here
 }
 
-void BassProject::initProject() {
-  // writes initial json bytedocument, creates directory structure, ensures
-  // folder with at least one wav files exists within project
-  //
-  //
-  //
-  bool Successful = false;
+BassProject::BassProject() : _defaultConstructed(true) {}
 
-  if (Successful) {
-    emit projectInitialized(projectMetaData);
-  }
-}
+bool BassProject::wasDefaultConstructed() { return _defaultConstructed; }
