@@ -17,7 +17,7 @@ ApplicationWindow {
 
     property bool isLoading: false
     property string projectName: projectManager.projectAttached ? projectManager.projectMetadata.projectName : "noProject"
-    property string currentProjectDir: projectManager.projectAttached ? projectManager.projectDir.path() : "no/project/dir"
+    property string currentProjectDir: projectManager.projectAttached ? projectManager.projectMetadata.projectDir : "no/project/dir"
 
     Connections {
         target: projectManager
@@ -45,7 +45,9 @@ ApplicationWindow {
         }
 
         function onProjectAttachedChanged() {
-            console.log("projectAttached Changed to ", projectManager.projectAttached);
+          console.log("projectAttached Changed to " )
+          console.log(projectManager.projectAttached);
+          console.log("EOL");
         }
     }
     // ── Menu Bar ──
@@ -291,7 +293,7 @@ ApplicationWindow {
 
             if (makingNewProject) {
                 console.log("Making New Project");
-                projectManager.initProject(name, path, "Tweety Bird");
+                projectManager.initProject(path, name, "Tweety Bird");
             } else {
                 console.log("Opening not new project");
                 projectManager.loadProject(path);
@@ -299,7 +301,7 @@ ApplicationWindow {
         }
 
         onOpeningRecentProject: function (UID) {
-            console.log("Opening Recent Project");
+            console.log("Opening Recent Project with UID" + UID);
             projectManager.loadRecentProject(UID);
         }
     }

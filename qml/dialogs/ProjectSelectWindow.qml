@@ -91,13 +91,13 @@ Dialog {
                             Layout.fillWidth: true
                             spacing: 2
                             Text {
-                                text: modelData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_NAME]
+                                text: projectName
                                 font.pixelSize: 13
                                 font.bold: true
                                 color: "#fff"
                             }
                             Text {
-                                text: modelData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_DIR]
+                                text: projectDir
                                 font.pixelSize: 10
                                 color: "#999"
                                 elide: Text.ElideRight
@@ -106,19 +106,28 @@ Dialog {
                         }
 
                         Text {
-                            text: modelData[SharedConstants.PROJECT_DATA][SharedConstants.PROJECT_LAST_ACCESSED]
+                          text: projectLastAccessed
                             font.pixelSize: 10
                             color: "#777"
                         }
                     }
-
+//    function listProperties(item) {
+//        var properties = "Properties:\\n";
+//        for (var p in item) {
+//            // Check if the property is not a function to filter out methods
+//            if (typeof item[p] !== "function") {
+//                properties += (p + ": " + item[p] + "\\n");
+//            }
+//        }
+//        return properties;
+//    }
                     MouseArea {
                         id: mouseArea
                         anchors.fill: parent
                         hoverEnabled: true
                         onClicked: {
                             makingNewProject = false;
-                            openingRecentProject(modelData[SharedConstants.PROJECT_ID]);
+                            openingRecentProject(projectUID.toString(Qt.WithoutBraces));
                         }
                     }
                 }

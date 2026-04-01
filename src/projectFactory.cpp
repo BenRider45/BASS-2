@@ -23,7 +23,7 @@ std::unique_ptr<BassProject> createProjectFromMetaData(QDir projectDirectory) {
 
   Result<QString> birdName = MetaManager::retrieveData<QString>(
       metaFilePath, constants::SharedConstants::PROJECT_BIRD_NAME);
-  bassproject::ProjectMetaPackage projMeta;
+  bassproject::projectMetaPackage projMeta;
 
   assert(ID.isSuccess() && timeCreated.isSuccess() &&
          lastAccessed.isSuccess() && projectName.isSuccess() &&
@@ -41,12 +41,17 @@ std::unique_ptr<BassProject> createProjectFromMetaData(QDir projectDirectory) {
 }
 
 std::unique_ptr<BassProject>
-createProjectFromNew(bassproject::ProjectMetaPackage projMeta) {
+createProjectFromNew(bassproject::projectMetaPackage projMeta) {
+  qDebug("Got to createProjectFromNew\n");
 
+  qDebug() << "projMeta.projectDir = " << projMeta.projectDir << "\n";
   assert(!MetaManager::VerifyMetaFileExistence(projMeta.projectDir));
+
   MetaManager::createMetaFile(
       projMeta.projectDir, constants::SharedConstants::PROJECT_META_FILE_NAME);
 
+  assert(MetaManager::VerifyMetaFileExistence(projMeta.projectDir));
+  qDebug("metaFileCreated\n");
   QString metaFilePath = MetaManager::getMetaFilePath(
       projMeta.projectDir, constants::SharedConstants::PROJECT_META_FILE_NAME);
 
@@ -85,11 +90,11 @@ createProjectFromNew(bassproject::ProjectMetaPackage projMeta) {
 
   MetaManager::writeData<QString>(metaFilePath,
                                   constants::SharedConstants::PROJECT_NAME,
-                                  projMeta.projectName);
+                                  QString(projMeta.projectName));
 
   MetaManager::writeData<QString>(metaFilePath,
                                   constants::SharedConstants::PROJECT_BIRD_NAME,
-                                  projMeta.birdName);
+                                  QString(projMeta.birdName));
 
   return std::make_unique<BassProject>(projMeta);
 }

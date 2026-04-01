@@ -1,15 +1,19 @@
+
 #include "projectmanager.h"
 #include "bassproject.h"
+#include "metamanager.h"
 #include "projectFactory.h"
+#include "recentProject.h"
 #include "sharedconstants.h"
 #include <QDateTime>
 #include <QDir>
 #include <QJsonParseError>
 #include <QStandardPaths>
 #include <QUuid>
+
 namespace {
-const QString RECENT_PROJECT_DATA = "RECENT_PROJECT_DATA";
 bool RecentProjectsDirty = false;
+
 void debug_printJsonObject(QJsonObject obj) {
   QJsonDocument doc(obj);
   QString jsonString = doc.toJson();
@@ -24,7 +28,8 @@ void debug_printJsonArray(QJsonArray arr) {
 
 } // namespace
 
-ProjectManager::ProjectManager(QObject *parent) : QObject(parent) {
+ProjectManager::ProjectManager(QObject *parent)
+    : QObject(parent), m_recentProjects(RecentProjectsModel(this)) {
   QDir recentProjectDataLoc =
       QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
@@ -33,60 +38,40 @@ ProjectManager::ProjectManager(QObject *parent) : QObject(parent) {
     recentProjectDataLoc.mkpath(".");
   }
 
-  if (!recentProjectDataLoc.exists(RECENT_PROJECT_DATA)) {
-    qWarning(
-        "Recent Project Data file not found in local data: Creating new\n");
+  if (!recentProjectDataLoc.exists(
+          constants::SharedConstants::RECENT_PROJECT_APPDATA_DIRECTORY)) {
+    qWarning("Recent Project Data directory not found in local data: Creating "
+             "new\n");
     RecentProjectsDirty = true;
-    QJsonArray SkeletonRecProject;
-
-    QJsonDocument recProjDataBlank(SkeletonRecProject);
-
-    QFile file(recentProjectDataLoc.filePath(RECENT_PROJECT_DATA));
-    if (file.open(QIODevice::WriteOnly)) {
-      file.write(recProjDataBlank.toJson());
-      qDebug() << "File written to " << recentProjectDataLoc.absolutePath()
-               << "\n";
-      file.close();
-    }
-  }
-
-  QFile recentProjData(recentProjectDataLoc.filePath(RECENT_PROJECT_DATA));
-  if (!recentProjData.open(QIODeviceBase::ReadOnly)) {
-    qWarning("Error Opening RecentProjectData File\n");
-    return;
-  }
-  QByteArray recProjDataByteArray = recentProjData.readAll();
-  //  char *data = recProjDataByteArray.data();
-  //  while (*data) {
-  //    qDebug() << "[" << *data << "]" << "\n";
-  //    ++data;
-  //  }
-  recentProjData.close();
-  QJsonParseError err;
-  QJsonDocument recProjDataDoc =
-      QJsonDocument::fromJson(recProjDataByteArray, &err);
-
-  if (err.error != QJsonParseError::NoError) {
-    qDebug() << "Failed to parse JSON doc:" << err.errorString();
-    // Handle the error (e.g., return, throw an exception, etc.)
+    recentProjectDataLoc.mkpath(
+        constants::SharedConstants::RECENT_PROJECT_APPDATA_DIRECTORY);
+    recentProjectDataLoc = recentProjectDataLoc.filePath(
+        constants::SharedConstants::RECENT_PROJECT_APPDATA_DIRECTORY);
   } else {
-    qDebug() << "JSON document created successfully.";
-
-    // Check if the document contains an object or an array
-    //
-    qDebug() << "isArray?: " << recProjDataDoc.isArray()
-             << "\n isObject?: " << recProjDataDoc.isObject() << "\n";
+    recentProjectDataLoc = recentProjectDataLoc.filePath(
+        constants::SharedConstants::RECENT_PROJECT_APPDATA_DIRECTORY);
   }
 
-  m_recentProjects = recProjDataDoc.array();
-  emit recentProjectsChanged();
+  if (!MetaManager::VerifyMetaFileExistence(recentProjectDataLoc)) {
+    qWarning("Recent Project Data Meta File not Found, creating ");
+    MetaManager::createMetaFile(
+        recentProjectDataLoc,
+        constants::SharedConstants::RECENT_PROJ_METAFILE_NAME);
+  }
+
+  QString recentProjMetaFilePath = MetaManager::getMetaFilePath(
+      recentProjectDataLoc,
+      constants::SharedConstants::RECENT_PROJ_METAFILE_NAME);
+
+  Result<QVector<RecentProject>> recentProjects =
+      MetaManager::RecentProjectUtils::extractRecentProjectList(
+          recentProjMetaFilePath);
+  assert(recentProjects.isSuccess());
+  m_recentProjects.loadRecentProjects(recentProjects.value());
+  emit recentProjectsModelChanged();
   qDebug() << "Successfully read in recent project data from:\n"
            << recentProjectDataLoc.absolutePath() << "\n";
-  qDebug() << m_recentProjects;
-  QJsonDocument doc(m_recentProjects);
 
-  QString jsonString = doc.toJson(QJsonDocument::Indented);
-  qDebug() << jsonString.toStdString();
   m_isInitialized = true;
 }
 
@@ -94,31 +79,21 @@ ProjectManager::~ProjectManager() {
   qDebug() << "Shutting this hoe down!!\n";
   if (!RecentProjectsDirty) {
     qDebug() << "Recent Projects Not Dirty\n";
-    return;
   }
   updateRecentProjectsFile();
   return;
 }
 
 void ProjectManager::updateRecentProjectsFile() {
-  qDebug() << "Got to updating file\n";
-  QDir recentProjectDataLoc =
-      QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-  QFile file(recentProjectDataLoc.filePath(RECENT_PROJECT_DATA));
-
-  QJsonDocument doc(m_recentProjects);
-  if (!file.open(QIODevice::WriteOnly)) {
-    qDebug() << "File Didint Open:(";
-    emit error("File didnt open ");
+  Result<bool> writeRes = m_recentProjects.updateRecentProjectsFile();
+  if (!writeRes.isSuccess()) {
+    std::cerr << writeRes.error().toStdString();
   }
 
-  file.write(doc.toJson());
-  file.close();
   RecentProjectsDirty = false;
 }
 
-bassproject::ProjectMetaPackage ProjectManager::projectMetadata() const {
+bassproject::projectMetaPackage ProjectManager::projectMetadata() const {
   return m_currentProject->_projMetaData;
 }
 
@@ -126,12 +101,15 @@ QString ProjectManager::birdName() const { return m_birdName; }
 QString ProjectManager::projectDir() const { return m_projectDir; }
 QString ProjectManager::wavDir() const { return m_wavDir; }
 
-QVariantList ProjectManager::recentProjects() const {
-  return m_recentProjects.toVariantList();
+RecentProjectsModel *ProjectManager::recentProjects() {
+  return &m_recentProjects;
 }
 
 bool ProjectManager::isInitialized() const { return m_isInitialized; }
-bool ProjectManager::projectAttached() const { return m_projectAttached; }
+bool ProjectManager::projectAttached() {
+  qDebug("projectAttached");
+  return m_projectAttached;
+}
 
 void ProjectManager::importWavFiles(const QString &wavDir) {
   qDebug() << "Importing Wav Files from : " << wavDir << "\n";
@@ -145,13 +123,19 @@ void ProjectManager::initProject(const QString &projectDir,
     emit error("Cannot create a project within another project!");
     return;
   }
+  qDebug() << "Creating Project at directory" << projectDir << "\n"
+           << "With name : " << projectName << "\n"
+           << "With bird name :" << birdName << "\n";
+
   QStringList keys;
   QVariantList values;
-  bassproject::ProjectMetaPackage projMetaPackage;
-  projMetaPackage.projectDir = projectDir;
+  bassproject::projectMetaPackage projMetaPackage;
+  projMetaPackage.projectDir = QDir(projectDir);
   projMetaPackage.projectID = QUuid::createUuid();
   projMetaPackage.timeCreated = QDateTime::currentDateTime();
   projMetaPackage.lastAccessed = QDateTime::currentDateTime();
+  projMetaPackage.projectName = projectName;
+  projMetaPackage.birdName = birdName;
   ProjectFactory::createProjectFromNew(projMetaPackage);
   loadProject(projectDir);
 }
@@ -175,74 +159,62 @@ void ProjectManager::loadProject(const QString &projDir) {
       metaDataPath, constants::SharedConstants::PROJECT_LAST_ACCESSED,
       QDateTime::currentDateTime());
 
+  RecentProject proj(
+      bassProj->_projMetaData.projectName, bassProj->_projMetaData.projectID,
+      bassProj->_projMetaData.lastAccessed, bassProj->_projMetaData.projectDir);
+
   QJsonObject metaData = fromProjectMetaToJson(bassProj->_projMetaData);
   debug_printJsonObject(metaData);
-  emit projectLoading(
-      QString(metaData[constants::SharedConstants::PROJECT_NAME].toString()));
-  updateRecentProjects(metaData);
+  emit projectLoading(QString(proj._projectName));
+  updateRecentProjects(proj);
   updateRecentProjectsFile();
 
-  setProjectAttached(true);
   setCurrentProject(std::move(bassProj));
+
+  setProjectAttached(true);
   emit projectLoaded();
 }
 void ProjectManager::setCurrentProject(std::unique_ptr<BassProject> bassProj) {
+  std::cerr << "got to setCurrentProject\n";
   m_currentProject = std::move(bassProj);
+  std::cerr << "Std::move didnt blow up\n";
+
   emit projectMetadataChanged();
 }
 void ProjectManager::loadRecentProject(const QString &UID) {
-  qDebug() << "Loading Recent Project";
-  qDebug() << "Looking for UUID" << UID;
-  for (auto val : m_recentProjects) {
-    QJsonObject obj = val.toObject();
-    if (QUuid(obj[constants::SharedConstants::PROJECT_ID].toString()) ==
-        QUuid(UID)) {
-      qDebug() << "Found project " << UID << "in recent projects\n"
-               << "Project lives at "
-               << obj[constants::SharedConstants::PROJECT_DIR].toString()
-               << "\n";
-      loadProject(obj[constants::SharedConstants::PROJECT_DIR].toString());
-      return;
-    }
-  }
-  emit error("Cannot Find Recent Project Project with UUID" + UID + "\n");
-}
+  qDebug() << "Loading Recent Project" << "\n";
+  qDebug() << "Looking for UUID" << UID << "\n";
+  QUuid uUid(UID);
+  qDebug() << "uUid: " << uUid << "\n";
+  QModelIndexList results = m_recentProjects.match(
+      m_recentProjects.index(0, 0), RecentProjectsModel::projectUIDRole, uUid,
+      1, Qt::MatchContains);
+  int idx = m_recentProjects.getIndexByUID(uUid);
 
-void ProjectManager::updateRecentProjects(QJsonObject projData) {
-  qDebug() << "updateRecentProjects\n ";
-  RecentProjectsDirty = true;
-  bool valueFound = false;
-  for (int i = 0; i < m_recentProjects.size(); i++) {
-    qDebug() << "i = " << i << "\n";
-    qDebug() << "m_recentProjects.at(i).isArray(): "
-             << m_recentProjects.at(i).isArray();
-
-    qDebug() << "m_recentProjects.at(i).isObject(): "
-             << m_recentProjects.at(i).isObject();
-    QJsonObject obj = m_recentProjects.at(i).toObject();
-    if (projData[constants::SharedConstants::PROJECT_ID].toString() ==
-        obj[constants::SharedConstants::PROJECT_ID].toString()) {
-      valueFound = true;
-      qDebug("Updateing project!!!");
-      obj = projData;
-
-      m_recentProjects.replace(i, obj);
-      return;
-    }
-  }
-  if (!valueFound) {
-    qDebug() << "Appending projData\n";
-    m_recentProjects.append(projData);
+  qDebug() << "idx :" << idx << "\n";
+  if (results.isEmpty()) {
+    emit error("Cannot Find Recent Project Project with UUID" + UID + "\n");
     return;
   }
+
+  qDebug() << "Results: " << results.first() << "\n";
+  qDebug() << "Result.length" << results.size() << "\n";
+  RecentProject proj = m_recentProjects.getProject(results.first());
+  std::cerr << proj << "n";
+  loadProject(proj._projectDir.absolutePath());
+  return;
+}
+
+void ProjectManager::updateRecentProjects(RecentProject projData) {
+  m_recentProjects.onProjectOpened(projData);
 }
 
 QJsonObject ProjectManager::fromProjectMetaToJson(
-    bassproject::ProjectMetaPackage metaPackage) {
+    bassproject::projectMetaPackage metaPackage) {
 
   QJsonObject obj;
   obj[constants::SharedConstants::PROJECT_DIR] =
-      QVariant::fromValue(metaPackage.projectDir).toJsonValue();
+      QVariant::fromValue(metaPackage.projectDir.absolutePath()).toString();
   obj[constants::SharedConstants::PROJECT_ID] =
       QVariant::fromValue(metaPackage.projectID).toJsonValue();
   obj[constants::SharedConstants::PROJECT_CREATE_DATE] =
@@ -254,7 +226,6 @@ QJsonObject ProjectManager::fromProjectMetaToJson(
 
   obj[constants::SharedConstants::PROJECT_BIRD_NAME] =
       QVariant::fromValue(metaPackage.birdName).toJsonValue();
-
   return obj;
 }
 

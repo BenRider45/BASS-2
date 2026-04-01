@@ -37,6 +37,9 @@ public:
   static inline const QString PROJECT_CREATE_DATE{"create_date"};
   static inline const QString PROJECT_ID{"ID"};
   static inline const QString PROJECT_DATA{"proj_data"};
+  static inline const QString RECENT_PROJ_METAFILE_NAME{"BASS_RECENT_PROJECTS"};
+  static inline const QString RECENT_PROJECT_APPDATA_DIRECTORY{
+      "BASS_RECENT_PROJECT_DATA"};
 };
 } // namespace constants
 #endif // SHAREDCONSTANTS_H

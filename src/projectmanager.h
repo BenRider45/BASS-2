@@ -2,7 +2,8 @@
 #define PROJECTMANAGER_H
 
 #include "bassproject.h"
-#include "metamanager.h"
+#include "recentProject.h"
+#include "recentprojectslistmodel.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -13,14 +14,14 @@
 class ProjectManager : public QObject {
   Q_OBJECT
 
-  Q_PROPERTY(
-      bassproject::ProjectMetaPackage projectMetadata READ projectMetadata)
+  Q_PROPERTY(bassproject::projectMetaPackage projectMetadata READ
+                 projectMetadata NOTIFY projectMetadataChanged)
 
   Q_PROPERTY(bool isInitialized READ isInitialized NOTIFY isInitializedChanged)
   Q_PROPERTY(bool projectAttached READ projectAttached WRITE setProjectAttached
                  NOTIFY projectAttachedChanged)
-  Q_PROPERTY(QVariantList recentProjects READ recentProjects NOTIFY
-                 recentProjectsChanged)
+  Q_PROPERTY(RecentProjectsModel *recentProjects READ recentProjects NOTIFY
+                 recentProjectsModelChanged);
 
 public:
   explicit ProjectManager(QObject *parent = nullptr);
@@ -29,11 +30,11 @@ public:
   QString projectDir() const;
   QString wavDir() const;
   bool isInitialized() const;
-  bool projectAttached() const;
+  bool projectAttached();
   QVariantMap currentProjectData() const;
-  bassproject::ProjectMetaPackage projectMetadata() const;
+  bassproject::projectMetaPackage projectMetadata() const;
 
-  QVariantList recentProjects() const;
+  RecentProjectsModel *recentProjects();
   void buildProjectDirectory(const QString &ProjDir);
   Q_INVOKABLE void initProject(const QString &projectDir,
                                const QString &projectName,
@@ -43,8 +44,11 @@ public:
   Q_INVOKABLE void loadRecentProject(const QString &UID);
   Q_INVOKABLE void importWavFiles(const QString &wavDir);
   void setProjectAttached(bool val) {
+    qDebug() << "Got to setProjectsAttached\n";
     m_projectAttached = val;
+    qDebug() << "value set\n";
     emit projectAttachedChanged();
+    qDebug() << "Signal Emitted\n";
   }
 
 signals:
@@ -55,29 +59,23 @@ signals:
   void projectLoaded();
   void projectOpened();
   void currentProjectChanged();
-  void recentProjectsChanged();
   void error(QString errorMessage);
+  void recentProjectsModelChanged();
 
 private:
   QString m_birdName;
   QString m_projectDir;
   QString m_wavDir;
-  QJsonArray m_recentProjects;
+  RecentProjectsModel m_recentProjects;
   bool m_isInitialized = false;
   bool m_projectAttached = false;
   std::unique_ptr<BassProject> m_currentProject;
   bool searchForProject();
-  void updateRecentProjects(QJsonObject projData);
+  void updateRecentProjects(RecentProject projData);
   void updateRecentProjectsFile();
   void setCurrentProject(std::unique_ptr<BassProject> bassProj);
   QJsonObject
-  fromProjectMetaToJson(bassproject::ProjectMetaPackage metaPackage);
-
-  // bool findMetaFile(const QString &ProjDir);
-  //  bool modMetaFile(const QString &path, const QStringList &key,
-  //                   const QStringList &value, bool addValueIfNeeded = false);
-  //   QString getMetaDataPath(const QString &projectDirectory);
-  //    QJsonObject extractMetaDataContent(const QString &metaFilePath);
+  fromProjectMetaToJson(bassproject::projectMetaPackage metaPackage);
 };
 
 #endif

@@ -6,30 +6,39 @@
 #include <QJsonObject>
 #include <QString>
 #include <QUuid>
-
 namespace bassproject {
 
-struct ProjectMetaPackage {
+struct projectMetaPackage {
+  Q_GADGET
+  Q_PROPERTY(QString projectDir MEMBER projectDirStr)
+  Q_PROPERTY(QDateTime projectLastAccessed MEMBER lastAccessed)
+  Q_PROPERTY(QString projectName MEMBER projectName)
+  Q_PROPERTY(QString birdName MEMBER birdName)
+
+public:
   QDir projectDir;
   QUuid projectID;
   QDateTime timeCreated;
   QDateTime lastAccessed;
   QString projectName;
   QString birdName;
+  QString projectDirStr = projectDir.absolutePath();
 };
 
 } // namespace bassproject
 
-Q_DECLARE_METATYPE(bassproject::ProjectMetaPackage)
+Q_DECLARE_METATYPE(bassproject::projectMetaPackage)
 
 class BassProject {
 public:
   explicit BassProject();
-  explicit BassProject(bassproject::ProjectMetaPackage metaPackage);
+  explicit BassProject(bassproject::projectMetaPackage metaPackage);
   ~BassProject() =
       default; // Update project's metafiles on destruction if needed
   bool wasDefaultConstructed();
-  bassproject::ProjectMetaPackage _projMetaData;
+  bassproject::projectMetaPackage _projMetaData;
+  void updateprojectMetaPackage();
+  void syncprojectMetaPackage();
 
 private:
   bool _defaultConstructed;

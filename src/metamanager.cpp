@@ -2,7 +2,6 @@
 #include "sharedconstants.h"
 #include <QVariant>
 #include <iostream>
-#include <ranges>
 namespace {
 
 void debug_printJsonObject(QJsonObject obj) {
@@ -34,8 +33,15 @@ bool createMetaFile(QDir directory, QString metaFileName) {
 
   QDir dir(directory);
   assert(!VerifyMetaFileExistence(directory));
+  qDebug() << "attempting to createMetaFile with name: "
+           << metaFileName + constants::SharedConstants::META_FILE_EXTENSION
+           << "\n at directory: " << directory.absolutePath();
   QJsonObject emptyObj;
   QJsonDocument doc(emptyObj);
+  qDebug() << "dir.filePath returns"
+           << dir.filePath(metaFileName +
+                           constants ::SharedConstants::META_FILE_EXTENSION)
+           << "\n";
   QFile file = QFile(dir.filePath(
       metaFileName + constants::SharedConstants::META_FILE_EXTENSION));
 
@@ -45,43 +51,10 @@ bool createMetaFile(QDir directory, QString metaFileName) {
     file.close();
     return true;
   } else {
+    qDebug() << "ERROR: Could not open file (in MetaManager::createMetaFile)\n";
     return false;
   }
 }
-
-// bool modMetaFile(QString metaFilePath, const QStringList &keys,
-//                  const QVariantList &values, bool addValuesIfNeeded) {
-//
-//   assert(keys.length() == values.length());
-//   QJsonDocument doc;
-//
-//   QFile file(metaFilePath);
-//
-//   if (file.open(QIODevice::ReadOnly)) {
-//     QByteArray data = file.readAll();
-//     doc = QJsonDocument::fromJson(data);
-//   }
-//   file.close();
-//   QJsonObject obj = doc.object();
-//   for (auto &&[k, v] : std::views::zip(keys, values)) {
-//     if (addValuesIfNeeded || obj.keys().contains(k)) {
-//       std::cerr << "v typename" << v.typeName() << "\n;";
-//       std::cerr << "canConvert: " << v.canConvert(QMetaType::QString) <<
-//       "\n";
-//
-//       qDebug() << "Adding values " << v.toString() << "for keys "
-//                << k.toStdString() << "\n";
-//       obj[k] = QJsonValue::fromVariant(v);
-//     }
-//   }
-//   qDebug() << "OBJECT AFTER ADDING STUFF\n";
-//   debug_printJsonObject(obj);
-//   file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-//   QJsonDocument newDoc(obj);
-//   file.write(newDoc.toJson());
-//   file.close();
-//   return true;
-// }
 
 bool VerifyMetaFileExistence(QDir directory) {
   QStringList lst;
@@ -99,6 +72,8 @@ bool VerifyMetaFileExistence(QDir directory) {
 
 QString getMetaFilePath(QDir path, QString fileName) {
   // Get meta file path of specific name
+  std::cerr << "Getting file with name : " << fileName.toStdString()
+            << "\n From path : " << path.absolutePath().toStdString() << "\n";
   assert(
       path.exists(fileName + constants::SharedConstants::META_FILE_EXTENSION));
   return path.filePath(fileName +

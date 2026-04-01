@@ -1,9 +1,9 @@
 #include "metamanager.h"
+#include "recentProject.h"
 #include <QDir>
 #include <QStringList>
 #include <gtest/gtest.h>
 #include <iostream>
-
 class TestMetaClass {
 public:
   TestMetaClass(int foo, QString MetaFilename, QString DirName)
@@ -47,29 +47,6 @@ TEST_F(MetaManagerTest, initsFromstdFilesystem) {
   MetaManager::createMetaFile(projDirPath, tmc._MetaFileName);
   EXPECT_EQ(MetaManager::VerifyMetaFileExistence(projDirPath), true);
 }
-
-// TEST_F(MetaManagerTest, readWriteItemstoMetaFile) {
-//
-//   TestMetaClass tmc(5, "TestMetaName", "DirName");
-//
-//   MetaManager::createMetaFile(projDirPath, tmc._MetaFileName);
-//   QString metaFilePath =
-//       MetaManager::getMetaFilePath(projDirPath, tmc._MetaFileName);
-//
-//   QStringList keys;
-//   keys << "name" << "number";
-//   QVariantList values;
-//   values << tmc._MetaFileName << tmc._foo;
-//
-//   MetaManager::writeData(metaFilePath, keys, values, true);
-//   QJsonObject fileData = MetaManager::extractMetaDataContent(metaFilePath);
-//
-//   QJsonDocument doc(fileData);
-//
-//   QByteArray jsonData = doc.toJson(QJsonDocument::Indented);
-//   std::cerr << jsonData.constData() << "\n";
-//   EXPECT_EQ(fileData.count(), 2);
-// }
 
 TEST_F(MetaManagerTest, readWriteArraytoMetaFile) {
   QStringList thingsToWrite = {"Things", "to", "Write", "into", "One", "Array"};
@@ -155,7 +132,53 @@ TEST_F(MetaManagerTest, readWriteQString) {
   EXPECT_TRUE(str == strResult.value());
 }
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+TEST_F(MetaManagerTest, readWriteQDateTime) {
+  QDateTime date = QDateTime::currentDateTime();
+  QString metaFileName = "meta_file";
+  MetaManager::createMetaFile(projDirPath, metaFileName);
+  QString key = "date";
+
+  QString metaFilePath =
+      MetaManager::getMetaFilePath(projDirPath, metaFileName);
+  Result<bool> writeRes =
+      MetaManager::writeData<QDateTime>(metaFilePath, key, date);
+
+  EXPECT_TRUE(writeRes.isSuccess());
+
+  Result<QDateTime> dateResult =
+      MetaManager::retrieveData<QDateTime>(metaFilePath, key);
+
+  EXPECT_TRUE(dateResult.isSuccess());
+  std::cerr << dateResult.value().toString().toStdString() << "\n";
+  std::cerr << date.toString().toStdString() << "\n";
+  EXPECT_TRUE(dateResult.value().toString() == date.toString());
+}
+
+TEST_F(MetaManagerTest, readWriteRecentProject) {
+  QDir dir("Test/Directory/yeah");
+  QDateTime time = QDateTime::currentDateTime();
+  QString name = "Awesome Test Project";
+  QUuid uid = QUuid::createUuid();
+
+  RecentProject recentProj(name, uid, time, dir);
+  QString metaFilename = "meta_file";
+  MetaManager::createMetaFile(projDirPath, metaFilename);
+
+  QString key = "RecentProject";
+  QString metaFilePath =
+      MetaManager::getMetaFilePath(projDirPath, metaFilename);
+  Result<bool> writeRes =
+      MetaManager::writeData<RecentProject>(metaFilePath, key, recentProj);
+
+  EXPECT_TRUE(writeRes.isSuccess());
+
+  Result<RecentProject> recentProjResult =
+      MetaManager::retrieveData<RecentProject>(metaFilePath, key);
+
+  EXPECT_TRUE(recentProjResult.isSuccess());
+
+  EXPECT_TRUE(recentProjResult.value()._projectDir == dir);
+  EXPECT_TRUE(recentProjResult.value()._projectID == uid);
+  EXPECT_TRUE(recentProjResult.value()._projectName == name);
+  EXPECT_TRUE(recentProjResult.value()._lastAccessed == time);
 }

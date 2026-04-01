@@ -1,4 +1,6 @@
 #pragma once
+
+#include "recentProject.h"
 #include <QDateTime>
 #include <QDir>
 #include <QJsonArray>
@@ -24,6 +26,31 @@ public:
       throw std::runtime_error("QString: missing 'value' field");
     }
     return obj["value"].toString();
+  }
+};
+
+template <> class SerializationTraits<RecentProject> {
+public:
+  static QJsonObject serialize(const RecentProject &proj) {
+    QJsonObject obj;
+    obj["ID"] = proj._projectID.toString(QUuid::WithoutBraces);
+    obj["Name"] = proj._projectName;
+    obj["LastAccessed"] = proj._lastAccessed.toMSecsSinceEpoch();
+    obj["ProjectDir"] = proj._projectDir.absolutePath();
+    return obj;
+  }
+
+  static RecentProject deserialize(const QJsonObject &obj) {
+    if (!obj.contains("ID") || !obj.contains("Name") ||
+        !obj.contains("LastAccessed") || !obj.contains("ProjectDir")) {
+      throw std::runtime_error("RecentProject: missing field in input object");
+    }
+    QUuid id = QUuid(obj["ID"].toString());
+    QString name = obj["Name"].toString();
+    QDateTime lastAccessed =
+        QDateTime::fromMSecsSinceEpoch(obj["LastAccessed"].toInteger());
+    QDir projDir = QDir(obj["ProjectDir"].toString());
+    return RecentProject(name, id, lastAccessed, projDir);
   }
 };
 
@@ -59,16 +86,17 @@ template <> class SerializationTraits<QDateTime> {
 public:
   static QJsonObject serialize(const QDateTime &dt) {
     QJsonObject obj;
-    obj["iso"] = dt.toString(Qt::ISODate);
+    obj["mSecsSinceEpoch"] = dt.toMSecsSinceEpoch();
     obj["timezone"] = "UTC"; // Document assumptions
     return obj;
   }
 
   static QDateTime deserialize(const QJsonObject &obj) {
-    if (!obj.contains("iso")) {
-      throw std::runtime_error("QDateTime: missing 'iso' field");
+    if (!obj.contains("mSecsSinceEpoch")) {
+      throw std::runtime_error("QDateTime: missing 'mSecsSinceEpoch' field");
     }
-    QDateTime dt = QDateTime::fromString(obj["iso"].toString(), Qt::ISODate);
+    QDateTime dt =
+        QDateTime::fromMSecsSinceEpoch(obj["mSecsSinceEpoch"].toInteger());
 
     if (!dt.isValid()) {
       throw std::runtime_error("QDateTime: invalid ISO date format");

@@ -24,6 +24,7 @@ set(SOURCES
     src/metamanager.cpp
     src/projectFactory.cpp
     src/bassproject.cpp
+    src/recentprojectslistmodel.cpp
 )
 
 set(HEADERS
@@ -39,6 +40,8 @@ set(HEADERS
     src/errorinator.h
     src/result.h 
     src/serializationtraits.h
+    src/recentProject.h
+    src/recentprojectslistmodel.h
 )
 
 # Create a library from the core source files
@@ -49,6 +52,7 @@ target_link_libraries(bass_core PRIVATE
     Qt6::QuickControls2
     Qt6::Multimedia
     Qt6::Core
+    
 )
 
 target_include_directories(bass_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)

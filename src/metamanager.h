@@ -1,4 +1,5 @@
 #pragma once
+#include "recentProject.h"
 #include "result.h"
 #include "serializationtraits.h"
 #include <QDir>
@@ -59,6 +60,7 @@ Result<bool> writeData(QString metaFilePath, QString key, const T &value,
     }
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
+    std::cerr << "Writing value " << data.toStdString() << "\n";
     file.write(data);
     file.close();
     return Result<bool>::ok(true);
@@ -108,6 +110,41 @@ Result<T> retrieveData(QString metaFilePath, QString key) {
                           1);
   }
 }
+
+namespace RecentProjectUtils {
+
+inline Result<QVector<RecentProject>>
+
+extractRecentProjectList(QString recentProjectFilePath) {
+  QFile file(recentProjectFilePath);
+
+  if (!file.open(QIODevice::ReadOnly)) {
+    std::cerr << "ERROR: Could not open file in extractRecentProjectList\n";
+  }
+
+  QByteArray data = file.readAll();
+
+  file.close();
+
+  QJsonDocument doc = QJsonDocument::fromJson(data);
+
+  QJsonObject metaData = doc.object();
+  QVector<RecentProject> output;
+  for (const auto key : metaData.keys()) {
+    try {
+      RecentProject proj = SerializationTraits<RecentProject>::deserialize(
+          metaData[key].toObject());
+      output.append(proj);
+    } catch (const std::exception &e) {
+      return Result<QVector<RecentProject>>::err(
+          QString("Error, could not deserialize '%1' as RecentProject: '%2'")
+              .arg(key, QString::fromStdString(e.what())),
+          1);
+    }
+  }
+  return Result<QVector<RecentProject>>::ok(output);
+}
+} // namespace RecentProjectUtils
 // template <Variantable T>
 // RetrievedObject<T> retrieveData(QString MetaFilePath, QString key) {
 //   QJsonObject metaData = extractMetaDataContent(MetaFilePath);
