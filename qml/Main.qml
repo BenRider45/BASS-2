@@ -45,9 +45,9 @@ ApplicationWindow {
         }
 
         function onProjectAttachedChanged() {
-          console.log("projectAttached Changed to " )
-          console.log(projectManager.projectAttached);
-          console.log("EOL");
+            console.log("projectAttached Changed to ");
+            console.log(projectManager.projectAttached);
+            console.log("EOL");
         }
     }
     // ── Menu Bar ──
@@ -342,7 +342,7 @@ ApplicationWindow {
                 font.pixelSize: 14
             }
             Label {
-                text: "Qt 6 / QML frontend recreation\nJin Group"
+                text: "Jin Group"
                 color: "#999"
                 wrapMode: Text.Wrap
             }

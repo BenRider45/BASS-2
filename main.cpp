@@ -41,7 +41,8 @@ int main(int argc, char *argv[]) {
   qmlRegisterSingletonType<constants::SharedConstants>(
       "Constants", 1, 0, "SharedConstants",
       &constants::SharedConstants::singletonProvider);
-  qmlRegisterType<bassproject::projectMetaPackage>("BASS", 1, 0, "projectMetaPackage");
+  qmlRegisterType<bassproject::projectMetaPackage>("BASS", 1, 0,
+                                                   "projectMetaPackage");
   // Register image provider (engine takes ownership)
   engine.addImageProvider("spectrogram", new SpectrogramProvider);
 

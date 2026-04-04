@@ -76,7 +76,7 @@ ProjectManager::ProjectManager(QObject *parent)
 }
 
 ProjectManager::~ProjectManager() {
-  qDebug() << "Shutting this hoe down!!\n";
+  qDebug() << "Shutting down Project Manager!!!\n";
   if (!RecentProjectsDirty) {
     qDebug() << "Recent Projects Not Dirty\n";
   }
@@ -163,8 +163,6 @@ void ProjectManager::loadProject(const QString &projDir) {
       bassProj->_projMetaData.projectName, bassProj->_projMetaData.projectID,
       bassProj->_projMetaData.lastAccessed, bassProj->_projMetaData.projectDir);
 
-  QJsonObject metaData = fromProjectMetaToJson(bassProj->_projMetaData);
-  debug_printJsonObject(metaData);
   emit projectLoading(QString(proj._projectName));
   updateRecentProjects(proj);
   updateRecentProjectsFile();
@@ -177,6 +175,8 @@ void ProjectManager::loadProject(const QString &projDir) {
 void ProjectManager::setCurrentProject(std::unique_ptr<BassProject> bassProj) {
   std::cerr << "got to setCurrentProject\n";
   m_currentProject = std::move(bassProj);
+  std::cerr << *m_currentProject.get() << "\n";
+
   std::cerr << "Std::move didnt blow up\n";
 
   emit projectMetadataChanged();
