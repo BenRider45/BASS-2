@@ -1,3 +1,4 @@
+#include "dependencies/AudioFile/AudioFile.h"
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -14,10 +15,11 @@ template <Numeric T> struct WavFileData {
 
 } // namespace wavfileUtils
 
-class WavFile {
+// namespace wavfileUtils
+template <wavfileUtils::Numeric T> class WavFile {
 public:
   WavFile(std::string filePath);
 
 private:
-  wavfileUtils::WavBuffer<uint32_t> _dataBuffer;
+  AudioFile<T> m_AudioFile;
 };
