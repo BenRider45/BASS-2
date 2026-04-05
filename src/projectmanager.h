@@ -14,9 +14,12 @@
 class ProjectManager : public QObject {
   Q_OBJECT
 
-  Q_PROPERTY(bassproject::projectMetaPackage projectMetadata READ
-                 projectMetadata NOTIFY projectMetadataChanged)
-
+  Q_PROPERTY(QString currentProjectDir READ currentProjectDir NOTIFY
+                 currentProjectDirChanged)
+  Q_PROPERTY(QString currentProjectName READ currentProjectName NOTIFY
+                 currentProjectNameChanged)
+  Q_PROPERTY(QString currentProjectBirdName READ currentProjectBirdName NOTIFY
+                 currentProjectBirdNameChanged)
   Q_PROPERTY(bool isInitialized READ isInitialized NOTIFY isInitializedChanged)
   Q_PROPERTY(bool projectAttached READ projectAttached WRITE setProjectAttached
                  NOTIFY projectAttachedChanged)
@@ -32,6 +35,10 @@ public:
   bool isInitialized() const;
   bool projectAttached();
   QVariantMap currentProjectData() const;
+  QString currentProjectDir() const;
+  QString currentProjectName() const;
+  QString currentProjectBirdName() const;
+
   bassproject::projectMetaPackage projectMetadata() const;
 
   RecentProjectsModel *recentProjects();
@@ -61,6 +68,9 @@ signals:
   void currentProjectChanged();
   void error(QString errorMessage);
   void recentProjectsModelChanged();
+  void currentProjectDirChanged();
+  void currentProjectNameChanged();
+  void currentProjectBirdNameChanged();
 
 private:
   QString m_birdName;

@@ -16,16 +16,14 @@ protected:
     std::cerr << "test dir: " << projDirPath.toStdString() << "\n";
     projUid = QUuid::createUuid();
 
-    projMeta.projectDir = QDir(projDirPath);
-    projMeta.projectID = projUid;
     testProjName = "TestProjName";
     birdName = "Tweety";
 
     lastaccessed = QDateTime::currentDateTimeUtc();
-    projMeta.projectName = testProjName;
-    projMeta.birdName = birdName;
-    projMeta.lastAccessed = lastaccessed;
-    projMeta.timeCreated = lastaccessed;
+
+    projMeta = bassproject::projectMetaPackage(
+        QDir(projDirPath), projUid, QDateTime::currentDateTimeUtc(),
+        lastaccessed, testProjName, birdName);
   }
 
   void TearDown() override {
@@ -57,7 +55,7 @@ TEST_F(projectFactoryTest, makeProjectObjectFromNewDirectoryFormatResult) {
   int EXPECTED_NUMBER_OF_FILES = 6;
   EXPECT_EQ(entryLst.size(), EXPECTED_NUMBER_OF_FILES + 2);
 
-  proj->updateprojectMetaPackage();
+  proj->updateProjectMetaPackage();
 
   EXPECT_EQ(proj->_projMetaData.projectDir, projMeta.projectDir);
   EXPECT_EQ(proj->_projMetaData.projectID, projMeta.projectID);
@@ -120,7 +118,7 @@ TEST_F(projectFactoryTest, makeProjectObjectFromMetaData) {
   std::cerr << "metaData.lastaccessed: "
             << metaData.lastAccessed.time().toString().toStdString() << "\n";
 
-  std::cerr << "lastaccessed: " << lastaccessed.time().toString().toStdString()
+  std::cerr << "lastaccessed: " << lastaccessed.toString().toStdString()
             << "\n";
   ASSERT_TRUE(metaData.timeCreated == lastaccessed);
   ASSERT_TRUE(metaData.lastAccessed == lastaccessed);

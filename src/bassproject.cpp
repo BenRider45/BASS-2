@@ -13,7 +13,7 @@ BassProject::BassProject() : _defaultConstructed(true) {}
 
 bool BassProject::wasDefaultConstructed() { return _defaultConstructed; }
 
-void BassProject::updateprojectMetaPackage() {
+void BassProject::updateProjectMetaPackage() {
   QDir origProjDir = _projMetaData.projectDir;
 
   Result<QString> projDir = MetaManager::retrieveData<QString>(

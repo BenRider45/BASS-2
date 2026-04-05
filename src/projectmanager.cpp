@@ -172,15 +172,34 @@ void ProjectManager::loadProject(const QString &projDir) {
   setProjectAttached(true);
   emit projectLoaded();
 }
+
+QString ProjectManager::currentProjectDir() const {
+  return m_projectAttached
+             ? m_currentProject.get()->_projMetaData.projectDir.absolutePath()
+             : QString("PROJECT/NOT/INITIALIZED");
+}
+
+QString ProjectManager::currentProjectName() const {
+  return m_projectAttached ? m_currentProject.get()->_projMetaData.projectName
+                           : QString("Project Not Initialized");
+}
+
+QString ProjectManager::currentProjectBirdName() const {
+  return m_projectAttached ? m_currentProject.get()->_projMetaData.birdName
+                           : QString("Bird For Project Not Initialized");
+}
 void ProjectManager::setCurrentProject(std::unique_ptr<BassProject> bassProj) {
   std::cerr << "got to setCurrentProject\n";
   m_currentProject = std::move(bassProj);
   std::cerr << *m_currentProject.get() << "\n";
 
   std::cerr << "Std::move didnt blow up\n";
-
+  emit currentProjectBirdNameChanged();
+  emit currentProjectNameChanged();
+  emit currentProjectDirChanged();
   emit projectMetadataChanged();
 }
+
 void ProjectManager::loadRecentProject(const QString &UID) {
   qDebug() << "Loading Recent Project" << "\n";
   qDebug() << "Looking for UUID" << UID << "\n";

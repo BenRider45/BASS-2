@@ -40,6 +40,8 @@ public:
   static inline const QString RECENT_PROJ_METAFILE_NAME{"BASS_RECENT_PROJECTS"};
   static inline const QString RECENT_PROJECT_APPDATA_DIRECTORY{
       "BASS_RECENT_PROJECT_DATA"};
+  static inline const QString EMPTY_PROJECT_NAME{"EMPTY_PROJECT_NAME"};
+  static inline const QString DEFAULT_BIRD_NAME{"Tweety Bird"};
 };
 } // namespace constants
 #endif // SHAREDCONSTANTS_H

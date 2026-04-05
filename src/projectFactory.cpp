@@ -23,18 +23,13 @@ std::unique_ptr<BassProject> createProjectFromMetaData(QDir projectDirectory) {
 
   Result<QString> birdName = MetaManager::retrieveData<QString>(
       metaFilePath, constants::SharedConstants::PROJECT_BIRD_NAME);
-  bassproject::projectMetaPackage projMeta;
+  bassproject::projectMetaPackage projMeta(
+      projectDirectory, ID.value(), timeCreated.value(), lastAccessed.value(),
+      projectName.value(), birdName.value());
 
   assert(ID.isSuccess() && timeCreated.isSuccess() &&
          lastAccessed.isSuccess() && projectName.isSuccess() &&
          birdName.isSuccess());
-
-  projMeta.projectDir = projectDirectory;
-  projMeta.projectID = ID.value();
-  projMeta.timeCreated = timeCreated.value();
-  projMeta.lastAccessed = lastAccessed.value();
-  projMeta.projectName = projectName.value();
-  projMeta.birdName = birdName.value();
 
   std::unique_ptr<BassProject> output = std::make_unique<BassProject>(projMeta);
   return output;
