@@ -51,7 +51,7 @@ Result<bool> writeData(QString metaFilePath, QString key, const T &value,
 
   try {
     QJsonObject obj = doc.object();
-    std::cerr << "Writing to key: " << key.toStdString() << "\n";
+    // std::cerr << "Writing to key: " << key.toStdString() << "\n";
     obj[key] = QJsonValue::fromVariant(
         QVariant::fromValue(SerializationTraits<T>::serialize(value)));
     if (!file.open(QIODevice::WriteOnly)) {
@@ -60,7 +60,7 @@ Result<bool> writeData(QString metaFilePath, QString key, const T &value,
     }
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
-    std::cerr << "Writing value " << data.toStdString() << "\n";
+    // std::cerr << "Writing value " << data.toStdString() << "\n";
     file.write(data);
     file.close();
     return Result<bool>::ok(true);

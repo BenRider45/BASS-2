@@ -25,6 +25,8 @@ set(SOURCES
     src/projectFactory.cpp
     src/bassproject.cpp
     src/recentprojectslistmodel.cpp
+    src/wavsurfer.cpp
+    src/audioFilesModel.cpp
 )
 
 set(HEADERS
@@ -42,10 +44,17 @@ set(HEADERS
     src/serializationtraits.h
     src/recentProject.h
     src/recentprojectslistmodel.h
-)
+    src/wavfile.h 
+    src/wavsurfer.h 
+    src/audioFilesModel.h
 
+  )
+
+  set(EXTERNAL_DEPENDENCIES 
+    src/dependencies/AudioFile/AudioFile.h
+  )
 # Create a library from the core source files
-add_library(bass_core STATIC ${SOURCES} ${HEADERS})
+add_library(bass_core STATIC ${SOURCES} ${HEADERS} ${EXTERNAL_DEPENDENCIES})
 
 target_link_libraries(bass_core PRIVATE
     Qt6::Quick

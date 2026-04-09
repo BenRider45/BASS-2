@@ -16,8 +16,8 @@ ApplicationWindow {
     Material.accent: Material.Teal
 
     property bool isLoading: false
-    property string projectName: projectManager.currentProjectName
-    property string currentProjectDir: projectManager.currentProjectDir.absolutePath
+    property string projectName: projectManager.projectAttached ? projectManager.currentProjectName : "No Project"
+    property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectDir.absolutePath : "No project"
 
     Connections {
         target: projectManager

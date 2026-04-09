@@ -1,9 +1,12 @@
 #ifndef PROJECTMANAGER_H
 #define PROJECTMANAGER_H
 
+#include "audioFilesModel.h"
 #include "bassproject.h"
 #include "recentProject.h"
 #include "recentprojectslistmodel.h"
+#include "sharedconstants.h"
+#include "wavsurfer.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -25,6 +28,8 @@ class ProjectManager : public QObject {
                  NOTIFY projectAttachedChanged)
   Q_PROPERTY(RecentProjectsModel *recentProjects READ recentProjects NOTIFY
                  recentProjectsModelChanged);
+  Q_PROPERTY(
+      AudioFilesModel *audioFiles READ audioFiles NOTIFY audioFilesModelChanged)
 
 public:
   explicit ProjectManager(QObject *parent = nullptr);
@@ -42,6 +47,7 @@ public:
   bassproject::projectMetaPackage projectMetadata() const;
 
   RecentProjectsModel *recentProjects();
+  AudioFilesModel *audioFiles();
   void buildProjectDirectory(const QString &ProjDir);
   Q_INVOKABLE void initProject(const QString &projectDir,
                                const QString &projectName,
@@ -68,6 +74,7 @@ signals:
   void currentProjectChanged();
   void error(QString errorMessage);
   void recentProjectsModelChanged();
+  void audioFilesModelChanged();
   void currentProjectDirChanged();
   void currentProjectNameChanged();
   void currentProjectBirdNameChanged();
@@ -77,12 +84,16 @@ private:
   QString m_projectDir;
   QString m_wavDir;
   RecentProjectsModel m_recentProjects;
+  AudioFilesModel m_audioFilesModel;
+  WavSurfer<SharedTypeDefs::WAVFILE_SAMPLE> m_wavSurfer;
   bool m_isInitialized = false;
   bool m_projectAttached = false;
   std::unique_ptr<BassProject> m_currentProject;
   bool searchForProject();
   void updateRecentProjects(RecentProject projData);
   void updateRecentProjectsFile();
+  void updateAudioFileModel(QString projPath);
+  void initAudioFileModel(QString projPath);
   void setCurrentProject(std::unique_ptr<BassProject> bassProj);
   QJsonObject
   fromProjectMetaToJson(bassproject::projectMetaPackage metaPackage);

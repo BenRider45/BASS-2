@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 Item {
     id: root
-
+    signal fileSelected
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 8
@@ -44,14 +44,14 @@ Item {
             id: fileList
             Layout.fillWidth: true
             Layout.fillHeight: true
-            model: fileListModel
+            model: projectManager.audioFiles
             clip: true
-            currentIndex: fileListModel.currentIndex
+            currentIndex: projectManager.audioFiles.currentFileIndex
 
             delegate: ItemDelegate {
                 width: fileList.width
                 height: 44
-                highlighted: index === fileListModel.currentIndex
+                highlighted: model.isCurrentSelectedFile
 
                 contentItem: RowLayout {
                     spacing: 8
@@ -62,13 +62,16 @@ Item {
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: model.annotationCount !== undefined ? model.annotationCount.toString() : "0"
+                      text: model.fileLength + " seconds"
                         color: "#999"
                         font.pixelSize: 11
                     }
                 }
 
-                onClicked: fileListModel.selectFile(index)
+                onClicked: {
+                    projectManager.audioFiles.setCurrentFile(index);
+                    fileSelected();
+                }
             }
 
             ScrollBar.vertical: ScrollBar {}

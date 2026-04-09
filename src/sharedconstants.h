@@ -42,6 +42,14 @@ public:
       "BASS_RECENT_PROJECT_DATA"};
   static inline const QString EMPTY_PROJECT_NAME{"EMPTY_PROJECT_NAME"};
   static inline const QString DEFAULT_BIRD_NAME{"Tweety Bird"};
+  static inline const QString PROJECT_AUDIO_DIRECTORY_NAME{"Audio"};
 };
 } // namespace constants
+  //
+  //
+namespace SharedTypeDefs {
+Q_NAMESPACE
+using WAVFILE_SAMPLE = uint32_t;
+
+} // namespace SharedTypeDefs
 #endif // SHAREDCONSTANTS_H

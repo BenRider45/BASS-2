@@ -1,5 +1,6 @@
 
 #include "projectmanager.h"
+#include "audioFilesModel.h"
 #include "bassproject.h"
 #include "metamanager.h"
 #include "projectFactory.h"
@@ -105,6 +106,8 @@ RecentProjectsModel *ProjectManager::recentProjects() {
   return &m_recentProjects;
 }
 
+AudioFilesModel *ProjectManager::audioFiles() { return &m_audioFilesModel; }
+
 bool ProjectManager::isInitialized() const { return m_isInitialized; }
 bool ProjectManager::projectAttached() {
   qDebug("projectAttached");
@@ -166,7 +169,7 @@ void ProjectManager::loadProject(const QString &projDir) {
   emit projectLoading(QString(proj._projectName));
   updateRecentProjects(proj);
   updateRecentProjectsFile();
-
+  initAudioFileModel(bassProj->_projMetaData.projectDir.absolutePath());
   setCurrentProject(std::move(bassProj));
 
   setProjectAttached(true);
@@ -226,6 +229,26 @@ void ProjectManager::loadRecentProject(const QString &UID) {
 
 void ProjectManager::updateRecentProjects(RecentProject projData) {
   m_recentProjects.onProjectOpened(projData);
+}
+
+void ProjectManager::updateAudioFileModel(QString projPath) {
+  qDebug() << "Got to updateAudioFileModel\n";
+  auto fileLst = m_wavSurfer.RetrieveWavFiles(projPath);
+
+  qDebug() << "FileLst Length: " << fileLst.size();
+
+  Result<bool> res = m_audioFilesModel.loadAudioFiles(fileLst);
+  if (!res.isSuccess()) {
+    emit error("UNABLE TO UPDATE AUDIO FILE MODEL" + res.error());
+    return;
+  }
+  emit audioFilesModelChanged();
+}
+
+void ProjectManager::initAudioFileModel(QString projPath) {
+  m_audioFilesModel.clearModel();
+  emit audioFilesModelChanged();
+  updateAudioFileModel(projPath);
 }
 
 QJsonObject ProjectManager::fromProjectMetaToJson(

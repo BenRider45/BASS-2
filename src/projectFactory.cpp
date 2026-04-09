@@ -95,7 +95,8 @@ createProjectFromNew(bassproject::projectMetaPackage projMeta) {
 }
 
 void buildProjectDirectoryStructure(QDir projectDirectory) {
-  projectDirectory.mkpath("Audio");
+  projectDirectory.mkpath(
+      constants::SharedConstants::PROJECT_AUDIO_DIRECTORY_NAME);
   projectDirectory.mkpath("Cache");
   projectDirectory.mkpath("Models");
   projectDirectory.mkpath("Annotations");
