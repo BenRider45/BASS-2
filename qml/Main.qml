@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Material
+import QtQuick.Dialogs
 import Constants 1.0
 import BASS
 
@@ -144,12 +145,26 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                FilesPanel {}
+                FilesPanel {
+
+                    onImportFiles: () => {
+                        fileDialog.open();
+                    }
+                }
                 ClusterSummaryPanel {}
             }
         }
     }
 
+    FolderDialog {
+        id: fileDialog
+        title: "Select a directory of wav files to import"
+
+        onAccepted: {
+            console.log("Importing Wav Files from directory:", fileDialog.selectedFolder);
+            projectManager.importWavFiles(fileDialog.selectedFolder.toString().replace("file://", ""));
+        }
+    }
     // ── Right Drawer (Control Panel, Settings, Player) ──
     Drawer {
         id: rightDrawer

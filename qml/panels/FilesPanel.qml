@@ -5,6 +5,7 @@ import QtQuick.Layouts
 Item {
     id: root
     signal fileSelected
+    signal importFiles
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 8
@@ -21,21 +22,26 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
+            // Button {
+            //     text: "◀"
+            //     enabled: fileListModel.currentPage > 0
+            //     onClicked: fileListModel.currentPage = fileListModel.currentPage - 1
+            // }
+            // Label {
+            //     text: "Page " + (fileListModel.currentPage + 1) + " / " + fileListModel.pageCount
+            //     Layout.fillWidth: true
+            //     horizontalAlignment: Text.AlignHCenter
+            //     color: "#DDD"
+            // }
+            // Button {
+            //     text: "▶"
+            //     enabled: fileListModel.currentPage < fileListModel.pageCount - 1
+            //     onClicked: fileListModel.currentPage = fileListModel.currentPage + 1
+            // }
+
             Button {
-                text: "◀"
-                enabled: fileListModel.currentPage > 0
-                onClicked: fileListModel.currentPage = fileListModel.currentPage - 1
-            }
-            Label {
-                text: "Page " + (fileListModel.currentPage + 1) + " / " + fileListModel.pageCount
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-                color: "#DDD"
-            }
-            Button {
-                text: "▶"
-                enabled: fileListModel.currentPage < fileListModel.pageCount - 1
-                onClicked: fileListModel.currentPage = fileListModel.currentPage + 1
+                text: "Import Files"
+                onClicked: importFiles()
             }
         }
 
@@ -62,7 +68,7 @@ Item {
                         Layout.fillWidth: true
                     }
                     Label {
-                      text: model.fileLength + " seconds"
+                        text: model.fileLength + " seconds"
                         color: "#999"
                         font.pixelSize: 11
                     }

@@ -6,6 +6,7 @@
 #include "projectFactory.h"
 #include "recentProject.h"
 #include "sharedconstants.h"
+#include "wavsurfer.h"
 #include <QDateTime>
 #include <QDir>
 #include <QJsonParseError>
@@ -115,7 +116,19 @@ bool ProjectManager::projectAttached() {
 }
 
 void ProjectManager::importWavFiles(const QString &wavDir) {
+  if (!m_projectAttached) {
+    return;
+  }
   qDebug() << "Importing Wav Files from : " << wavDir << "\n";
+
+  WavSurferUtils::WavFileList<SharedTypeDefs::WAVFILE_SAMPLE> newFileList =
+      m_wavSurfer.ImportWavFilesIntoProject(
+
+          wavDir, m_currentProject->_projMetaData.projectDirStr);
+  m_audioFilesModel.clearModel();
+  qDebug() << "Adding " << newFileList.size() << " New Files \n";
+  m_audioFilesModel.loadAudioFiles(newFileList);
+  emit audioFilesModelChanged();
 }
 
 void ProjectManager::initProject(const QString &projectDir,

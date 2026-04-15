@@ -47,7 +47,7 @@ set(HEADERS
     src/wavfile.h 
     src/wavsurfer.h 
     src/audioFilesModel.h
-
+    src/fftforeman.h
   )
 
   set(EXTERNAL_DEPENDENCIES 

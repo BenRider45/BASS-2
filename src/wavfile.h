@@ -31,7 +31,10 @@ public:
     return m_AudioFile.getLengthInSeconds();
   };
 
-private:
+  bool operator==(const WavFile<T> &other) const {
+    return m_filePath == other.m_filePath;
+  }
+
   AudioFile<T> m_AudioFile;
 };
 

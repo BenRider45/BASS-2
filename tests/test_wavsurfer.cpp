@@ -60,11 +60,14 @@ TEST_F(WavSurferTest, moveWavFilesFromDirectoryToProject) {
 
   WavSurfer<SharedTypeDefs::WAVFILE_SAMPLE> surfer;
 
-  surfer.ImportWavFilesIntoProject(testWavDataPath, projDirPath);
+  WavSurferUtils::WavFileList<SharedTypeDefs::WAVFILE_SAMPLE> movedList =
+      surfer.ImportWavFilesIntoProject(testWavDataPath, projDirPath);
 
   QVector<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>> fileLst =
       surfer.RetrieveWavFiles(projDirPath);
   ASSERT_TRUE(testDataEntryList.size() > 0);
 
   ASSERT_EQ(fileLst.size(), testDataEntryList.size());
+
+  ASSERT_EQ(movedList.size(), testDataEntryList.size());
 }
