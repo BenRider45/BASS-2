@@ -150,6 +150,9 @@ ApplicationWindow {
                     onImportFiles: () => {
                         fileDialog.open();
                     }
+                    onFileSelected: index => {
+                        spectrogramView.renderNewFile(index);
+                    }
                 }
                 ClusterSummaryPanel {}
             }
@@ -204,7 +207,14 @@ ApplicationWindow {
 
                 ControlPanel {}
                 PlayerPanel {}
-                SettingsPanel {}
+                SettingsPanel {
+
+                    onXScaleChanged(int value) => {}
+                    onYScaleChanged(int value) => {}
+                    onX0Changed(int value) => {}
+                    onY0Changed(int value) => {}
+                    onHopLengthChanged(int value) => {}
+                }
             }
         }
     }
@@ -213,82 +223,87 @@ ApplicationWindow {
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
-
-        SpectrogramView {
-            id: spectrogramView
+        SplitView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            focus: true
+            orientation: Qt.Vertical
 
-            // Keyboard shortcuts
-            Keys.onLeftPressed: spectrogramController.prevPage()
-            Keys.onRightPressed: spectrogramController.nextPage()
-            Keys.onUpPressed: spectrogramController.setThreshold(spectrogramController.threshold + 0.01)
-            Keys.onDownPressed: spectrogramController.setThreshold(spectrogramController.threshold - 0.01)
-            Keys.onReturnPressed: promptDialog.open()
+            SpectrogramView {
+                id: spectrogramView
+                SplitView.fillWidth: true
+                SplitView.minimumHeight: 256
+                focus: true
 
-            Keys.onPressed: function (event) {
-                switch (event.key) {
-                case Qt.Key_D:
-                    spectrogramView.cursorX += spectrogramView.cursorStep;
-                    event.accepted = true;
-                    break;
-                case Qt.Key_A:
-                    spectrogramView.cursorX -= spectrogramView.cursorStep;
-                    event.accepted = true;
-                    break;
-                case Qt.Key_C:
-                    // Next threshold crossing — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_Z:
-                    // Prev threshold crossing — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_V:
-                    // Next annotation — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_X:
-                    // Prev annotation — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_N:
-                    // Next file — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_P:
-                    // Prev file — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_R:
-                    // Remove selected annotation — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_L:
-                    promptDialog.open();
-                    event.accepted = true;
-                    break;
-                case Qt.Key_G:
-                    // Adjust to threshold — placeholder
-                    event.accepted = true;
-                    break;
-                case Qt.Key_Plus:
-                case Qt.Key_Equal:
-                    spectrogramView.cursorStep = Math.min(50, spectrogramView.cursorStep + 1);
-                    event.accepted = true;
-                    break;
-                case Qt.Key_Minus:
-                    spectrogramView.cursorStep = Math.max(1, spectrogramView.cursorStep - 1);
-                    event.accepted = true;
-                    break;
+                // Keyboard shortcuts
+                Keys.onLeftPressed: spectrogramController.prevPage()
+                Keys.onRightPressed: spectrogramController.nextPage()
+                Keys.onUpPressed: spectrogramController.setThreshold(spectrogramController.threshold + 0.01)
+                Keys.onDownPressed: spectrogramController.setThreshold(spectrogramController.threshold - 0.01)
+                Keys.onReturnPressed: promptDialog.open()
+
+                Keys.onPressed: function (event) {
+                    switch (event.key) {
+                    case Qt.Key_D:
+                        spectrogramView.cursorX += spectrogramView.cursorStep;
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_A:
+                        spectrogramView.cursorX -= spectrogramView.cursorStep;
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_C:
+                        // Next threshold crossing — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_Z:
+                        // Prev threshold crossing — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_V:
+                        // Next annotation — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_X:
+                        // Prev annotation — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_N:
+                        // Next file — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_P:
+                        // Prev file — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_R:
+                        // Remove selected annotation — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_L:
+                        promptDialog.open();
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_G:
+                        // Adjust to threshold — placeholder
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_Plus:
+                    case Qt.Key_Equal:
+                        spectrogramView.cursorStep = Math.min(50, spectrogramView.cursorStep + 1);
+                        event.accepted = true;
+                        break;
+                    case Qt.Key_Minus:
+                        spectrogramView.cursorStep = Math.max(1, spectrogramView.cursorStep - 1);
+                        event.accepted = true;
+                        break;
+                    }
                 }
             }
-        }
 
-        InfoBar {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            InfoBar {
+                Layout.fillWidth: true
+                SplitView.Layout.fillHeight: true
+            }
         }
     }
 

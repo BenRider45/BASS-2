@@ -1,58 +1,78 @@
-#ifndef SPECTROGRAMPROVIDER_H
-#define SPECTROGRAMPROVIDER_H
+#include "audioFilesModel.h"
+#include "datarasterfactory.h"
+#include <QtQuick/QQuickPaintedItem>
+#include <qwt_plot_spectrogram.h>
+#include <qwt_scale_map.h>
+class SpectrogramProvider : public QQuickPaintedItem {
+  Q_OBJECT
+  Q_PROPERTY(AudioFilesModel *audioFilesModel READ audioFilesModel WRITE
+                 setAudioFilesModel NOTIFY audioFilesModelChanged)
 
-#include <QObject>
-#include <QQuickImageProvider>
-#include <QImage>
-#include <QQmlEngine>
-
-// Image provider: returns placeholder spectrogram/trace images
-class SpectrogramProvider : public QQuickImageProvider
-{
-public:
-    SpectrogramProvider();
-    QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
-};
-
-// Controller exposed to QML for spectrogram navigation and display settings
-class SpectrogramController : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(int navPage READ navPage WRITE setNavPage NOTIFY navPageChanged)
-    Q_PROPERTY(int navMax READ navMax NOTIFY navMaxChanged)
-    Q_PROPERTY(double vmin READ vmin WRITE setVmin NOTIFY colorLimitsChanged)
-    Q_PROPERTY(double vmax READ vmax WRITE setVmax NOTIFY colorLimitsChanged)
-    Q_PROPERTY(double threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged)
+  Q_PROPERTY(double CONFIG_xscale READ xscale WRITE set_xscale NOTIFY
+                 RenderConfigChanged);
+  Q_PROPERTY(double CONFIG_yscale READ yscale WRITE set_yscale NOTIFY
+                 RenderConfigChanged);
+  Q_PROPERTY(double CONFIG_color_scale READ color_scale WRITE set_color_scale
+                 NOTIFY RenderConfigChanged);
+  Q_PROPERTY(double CONFIG_x0 READ x0 WRITE set_x0 NOTIFY RenderConfigChanged);
+  Q_PROPERTY(double CONFIG_y0 READ y0 WRITE set_y0 NOTIFY RenderConfigChanged);
 
 public:
-    explicit SpectrogramController(QObject *parent = nullptr);
+  explicit SpectrogramProvider(QQuickItem *parent = nullptr);
 
-    int navPage() const;
-    void setNavPage(int page);
-    int navMax() const;
-    double vmin() const;
-    void setVmin(double v);
-    double vmax() const;
-    void setVmax(double v);
-    double threshold() const;
-    void setThreshold(double t);
+  void paint(QPainter *painter) override;
 
-    Q_INVOKABLE void nextPage();
-    Q_INVOKABLE void prevPage();
-    Q_INVOKABLE void setColorLimits(double min, double max);
+  double xscale() const { return CONFIG_xscale; };
+  double yscale() const { return CONFIG_yscale; };
+  double color_scale() const { return CONFIG_color_scale; };
+  double x0() const { return CONFIG_x0; };
+  double y0() const { return CONFIG_y0; };
 
+  void set_xscale(double val) {
+    CONFIG_xscale = val;
+    emit RenderConfigChanged();
+  };
+  void set_yscale(double val) {
+    CONFIG_yscale = val;
+    emit RenderConfigChanged();
+  };
+  void set_color_scale(double val) {
+    CONFIG_color_scale = val;
+    emit RenderConfigChanged();
+  };
+  void set_x0(double val) {
+    CONFIG_x0 = val;
+    emit RenderConfigChanged();
+  };
+  void set_y0(double val) {
+    CONFIG_y0 = val;
+    emit RenderConfigChanged();
+  };
+  Q_INVOKABLE void loadNewSpectrogramData(int AudioFilesModelIndex);
+
+  AudioFilesModel *audioFilesModel() const { return m_audioFilesModel; }
+  void setAudioFilesModel(AudioFilesModel *model) {
+    if (m_audioFilesModel == model)
+      return;
+    m_audioFilesModel = model;
+    emit audioFilesModelChanged();
+  }
 signals:
-    void navPageChanged();
-    void navMaxChanged();
-    void colorLimitsChanged();
-    void thresholdChanged();
+  void renderingStarted();
+  void renderingFinished();
+  void dataLoaded();
+  void audioFilesModelChanged();
+
+  void RenderConfigChanged();
 
 private:
-    int m_navPage = 0;
-    int m_navMax = 0;
-    double m_vmin = 0.0;
-    double m_vmax = 1.0;
-    double m_threshold = 0.5;
+  QwtPlotSpectrogram *m_spectrogram = new QwtPlotSpectrogram();
+  AudioFilesModel *m_audioFilesModel;
+  QwtScaleMap m_xMap;
+  QwtScaleMap m_yMap;
+  double CONFIG_xscale = 1;
+  double CONFIG_yscale = 1;
+  double CONFIG_color_scale;
+  double CONFIG_x0;
+  double CONFIG_y0;
 };
-
-#endif // SPECTROGRAMPROVIDER_H

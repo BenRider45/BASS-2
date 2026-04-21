@@ -11,7 +11,6 @@
 #include "sharedconstants.h"
 #include "spectrogramprovider.h"
 #include <QDirIterator>
-
 int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
   QDirIterator it(":", QDirIterator::Subdirectories);
@@ -27,24 +26,20 @@ int main(int argc, char *argv[]) {
   // Create and register singleton instances
   ProjectManager projectManager;
   AnnotationModel annotationModel;
-  SpectrogramController spectrogramController;
   FileListModel fileListModel;
   AudioPlayer audioPlayer;
-
   engine.rootContext()->setContextProperty("projectManager", &projectManager);
   engine.rootContext()->setContextProperty("annotationModel", &annotationModel);
-  engine.rootContext()->setContextProperty("spectrogramController",
-                                           &spectrogramController);
   engine.rootContext()->setContextProperty("fileListModel", &fileListModel);
   engine.rootContext()->setContextProperty("audioPlayer", &audioPlayer);
+  qmlRegisterType<SpectrogramProvider>("BASSGraphics", 1, 0,
+                                       "SpectrogramProvider");
 
   qmlRegisterSingletonType<constants::SharedConstants>(
       "Constants", 1, 0, "SharedConstants",
       &constants::SharedConstants::singletonProvider);
   qmlRegisterType<bassproject::projectMetaPackage>("BASS", 1, 0,
                                                    "projectMetaPackage");
-  // Register image provider (engine takes ownership)
-  engine.addImageProvider("spectrogram", new SpectrogramProvider);
 
   QObject::connect(
       &engine, &QQmlApplicationEngine::objectCreationFailed, &app,

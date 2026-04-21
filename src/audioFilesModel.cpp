@@ -1,7 +1,9 @@
 #include "audioFilesModel.h"
 #include "sharedconstants.h"
+#include "wavfile.h"
 #include <QFile>
 #include <QFileInfo>
+#include <memory>
 
 AudioFilesModel::AudioFilesModel(QObject *parent)
     : QAbstractListModel(parent) {}
@@ -44,6 +46,20 @@ void AudioFilesModel::clearModel() {
   m_wavFiles.clear();
   m_currentSelectedFileRowIdx = -1;
   endResetModel();
+}
+
+std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>>
+AudioFilesModel::getAudioFile(int idx) {
+  std::cerr << "in getAudioFile \n looking for index " << idx << "\n";
+  std::cerr << "len:" << m_wavFiles.length();
+  for (auto file : m_wavFiles) {
+    std::cerr << "file: " << file.GetLengthInSeconds() << "\n";
+  }
+  std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>> output =
+      std::make_unique<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>>(
+          m_wavFiles.at(idx));
+  std::cerr << "created unique_ptr \n";
+  return std::move(output);
 }
 
 void AudioFilesModel::setCurrentFile(int idx) {

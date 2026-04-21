@@ -31,6 +31,10 @@ public:
     return m_AudioFile.getLengthInSeconds();
   };
 
+  double getSampleRate() const { return m_AudioFile.getSampleRate(); }
+  double getDeltaTPerSample() const {
+    return 1.0 / m_AudioFile.getSampleRate();
+  }
   bool operator==(const WavFile<T> &other) const {
     return m_filePath == other.m_filePath;
   }

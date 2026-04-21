@@ -1,3 +1,6 @@
 [submodule "src/dependencies/AudioFile"]
 	path = src/dependencies/AudioFile
 	url = https://github.com/adamstark/AudioFile
+[submodule "src/dependencies/dj_fft"]
+	path = src/dependencies/dj_fft
+	url = https://github.com/jdupuy/dj_fft

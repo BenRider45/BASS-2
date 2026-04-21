@@ -1,114 +1,64 @@
 #include "spectrogramprovider.h"
-#include <QPainter>
+#include "audioFilesModel.h"
+#include "datarasterfactory.h"
+#include "fftforeman.h"
+#include "sharedconstants.h"
+#include "spectrogramdatarasterinstance.h"
 #include <QLinearGradient>
+#include <QPainter>
+#include <memory>
 
-// --- SpectrogramProvider ---
+SpectrogramProvider::SpectrogramProvider(QQuickItem *parent)
+    : QQuickPaintedItem(parent) {}
 
-SpectrogramProvider::SpectrogramProvider()
-    : QQuickImageProvider(QQuickImageProvider::Image)
-{
+void SpectrogramProvider::loadNewSpectrogramData(int audioFilesModelIndex) {
+  std::cerr << "loadingNewSpectrogramData from index " << audioFilesModelIndex
+            << "\n";
+  std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>> requestedFile =
+      m_audioFilesModel->getAudioFile(audioFilesModelIndex);
+  std::cerr << "loaded in file from m_audioFilesModel\n";
+  // implement way to get WavData from WavFile (just get STFT data)
+  // TODO make STFT_DATA_MAGNITUDE for double compatibility
+  fftforemanutils::STFT_DATA<double> STFT_Data =
+      FFTForeman::STFT<double>(*requestedFile.release(), 256, 128);
+  std::cerr << "made STFT data \n";
+  auto dataRaster = DataRasterFactory::get_raster_data_instance<
+      SpectrogramDataRasterInstance<double>, double,
+      fftforemanutils::STFT_DATA<double>>(std::move(STFT_Data));
+  std::cerr << "made dataRaster instance\n";
+
+  m_spectrogram->setData(dataRaster.release());
+  std::cerr << "set Data\n";
+  update();
 }
 
-QImage SpectrogramProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
-{
-    int width = requestedSize.width() > 0 ? requestedSize.width() : 800;
-    int height = requestedSize.height() > 0 ? requestedSize.height() : 256;
+void SpectrogramProvider::paint(QPainter *painter) {
+  if (!m_spectrogram->data()) {
+    return; // Nothing to draw yet
+  }
+  painter->scale(CONFIG_xscale, CONFIG_yscale);
+  // 1. Get the current size of the QML Item (in pixels)
+  const QRectF rect = contentsBoundingRect();
 
-    QImage img(width, height, QImage::Format_RGB32);
+  // 2. Setup the X-Axis Map (Time)
+  QwtScaleMap xMap;
+  xMap.setPaintInterval(rect.left(), rect.right());
+  xMap.setScaleInterval(
+      CONFIG_xscale * m_spectrogram->data()->interval(Qt::XAxis).minValue(),
+      CONFIG_xscale * m_spectrogram->data()->interval(Qt::XAxis).maxValue());
 
-    if (id == "trace") {
-        // Placeholder trace: dark background with a horizontal line
-        img.fill(QColor(30, 30, 30));
-        QPainter p(&img);
-        p.setPen(QPen(QColor(0, 200, 100), 1));
-        int mid = height / 2;
-        p.drawLine(0, mid, width, mid);
-    } else {
-        // Placeholder spectrogram: dark gradient
-        QPainter p(&img);
-        QLinearGradient grad(0, 0, 0, height);
-        grad.setColorAt(0.0, QColor(10, 10, 40));
-        grad.setColorAt(0.5, QColor(30, 30, 80));
-        grad.setColorAt(1.0, QColor(10, 10, 40));
-        p.fillRect(img.rect(), grad);
+  // 3. Setup the Y-Axis Map (Frequency)
+  // Note: In UI coordinates, 0 is at the top, so we often flip the paint
+  // interval
+  QwtScaleMap yMap;
+  yMap.setPaintInterval(rect.bottom(), rect.top());
+  yMap.setScaleInterval(
+      CONFIG_yscale * m_spectrogram->data()->interval(Qt::YAxis).minValue(),
+      CONFIG_yscale * m_spectrogram->data()->interval(Qt::YAxis).maxValue());
 
-        // Draw a grid to make it look like a spectrogram placeholder
-        p.setPen(QPen(QColor(60, 60, 100), 1, Qt::DotLine));
-        for (int y = 0; y < height; y += 32)
-            p.drawLine(0, y, width, y);
-        for (int x = 0; x < width; x += 80)
-            p.drawLine(x, 0, x, height);
-    }
-
-    if (size)
-        *size = img.size();
-    return img;
+  // 4. Draw the spectrogram
+  // The third argument (canvasRect) is used for clipping; usually the same as
+  // rect.
+  m_spectrogram->draw(painter, xMap, yMap, rect);
 }
-
 // --- SpectrogramController ---
-
-SpectrogramController::SpectrogramController(QObject *parent)
-    : QObject(parent)
-{
-}
-
-int SpectrogramController::navPage() const { return m_navPage; }
-void SpectrogramController::setNavPage(int page)
-{
-    if (m_navPage != page) {
-        m_navPage = page;
-        emit navPageChanged();
-    }
-}
-
-int SpectrogramController::navMax() const { return m_navMax; }
-
-double SpectrogramController::vmin() const { return m_vmin; }
-void SpectrogramController::setVmin(double v)
-{
-    if (!qFuzzyCompare(m_vmin, v)) {
-        m_vmin = v;
-        emit colorLimitsChanged();
-    }
-}
-
-double SpectrogramController::vmax() const { return m_vmax; }
-void SpectrogramController::setVmax(double v)
-{
-    if (!qFuzzyCompare(m_vmax, v)) {
-        m_vmax = v;
-        emit colorLimitsChanged();
-    }
-}
-
-double SpectrogramController::threshold() const { return m_threshold; }
-void SpectrogramController::setThreshold(double t)
-{
-    if (!qFuzzyCompare(m_threshold, t)) {
-        m_threshold = t;
-        emit thresholdChanged();
-    }
-}
-
-void SpectrogramController::nextPage()
-{
-    if (m_navPage < m_navMax) {
-        m_navPage++;
-        emit navPageChanged();
-    }
-}
-
-void SpectrogramController::prevPage()
-{
-    if (m_navPage > 0) {
-        m_navPage--;
-        emit navPageChanged();
-    }
-}
-
-void SpectrogramController::setColorLimits(double min, double max)
-{
-    m_vmin = min;
-    m_vmax = max;
-    emit colorLimitsChanged();
-}

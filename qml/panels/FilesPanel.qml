@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    signal fileSelected
+    signal fileSelected(int index)
     signal importFiles
     ColumnLayout {
         anchors.fill: parent
@@ -76,7 +76,7 @@ Item {
 
                 onClicked: {
                     projectManager.audioFiles.setCurrentFile(index);
-                    fileSelected();
+                    fileSelected(index);
                 }
             }
 
@@ -84,7 +84,7 @@ Item {
         }
 
         Label {
-            text: fileListModel.count + " files"
+            text: projectManager.audioFiles.count + " files"
             color: "#999"
             font.pixelSize: 11
         }

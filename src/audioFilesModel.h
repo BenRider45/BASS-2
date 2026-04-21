@@ -35,6 +35,9 @@ public:
   Result<bool>
   addAudioFile(const WavFile<SharedTypeDefs::WAVFILE_SAMPLE> &audioFile);
 
+  // TODO implement
+  std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>>
+  getAudioFile(int idx);
   void clearModel();
 signals:
   void currentFileIndexChanged();

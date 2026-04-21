@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake"  )
+
+
 find_package(Qt6 REQUIRED COMPONENTS Core Quick QuickControls2 Multimedia)
-
-
+find_package(Qwt REQUIRED)
 set(QT_QML_GENERATE_QMLLS_INI ON)
 
 qt_policy(SET QTP0004 NEW)
@@ -15,7 +17,6 @@ qt_standard_project_setup(REQUIRES 6.5)
 
 option(BUILD_TESTS "Build unit tests" ON)
 set(SOURCES
-    main.cpp
     src/projectmanager.cpp
     src/annotationmodel.cpp
     src/spectrogramprovider.cpp
@@ -27,6 +28,7 @@ set(SOURCES
     src/recentprojectslistmodel.cpp
     src/wavsurfer.cpp
     src/audioFilesModel.cpp
+    src/datarasterfactory.cpp
 )
 
 set(HEADERS
@@ -47,7 +49,10 @@ set(HEADERS
     src/wavfile.h 
     src/wavsurfer.h 
     src/audioFilesModel.h
-    src/fftforeman.h
+    src/fftforeman.h 
+    src/Irastercompatibledata.h 
+    src/datarasterfactory.h 
+    src/spectrogramdatarasterinstance.h 
   )
 
   set(EXTERNAL_DEPENDENCIES 
@@ -56,16 +61,20 @@ set(HEADERS
 # Create a library from the core source files
 add_library(bass_core STATIC ${SOURCES} ${HEADERS} ${EXTERNAL_DEPENDENCIES})
 
+target_include_directories(bass_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(bass_core BEFORE PRIVATE ${QWT_INCLUDE_DIR})
+
 target_link_libraries(bass_core PRIVATE
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::Multimedia
     Qt6::Core
-    
 )
 
-target_include_directories(bass_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+
+# Link Qwt library (already found by find_package above)
+target_link_libraries(bass_core PRIVATE Qwt::Qwt)
 # Create the executable with QML support
 qt_add_executable(bass_qml main.cpp)
 
@@ -90,6 +99,8 @@ qt_add_qml_module(bass_qml
         qml/dialogs/ProjectInitDialog.qml
         qml/dialogs/PromptDialog.qml
 )
+
+target_include_directories(bass_qml BEFORE PRIVATE ${QWT_INCLUDE_DIR})
 
 target_link_libraries(bass_qml PRIVATE
     bass_core

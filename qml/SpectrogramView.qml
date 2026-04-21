@@ -1,10 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-
+import BASSGraphics 1.0
+import BASS
 Item {
     id: root
-
+    function renderNewFile(index){
+      hi.renderNewSpectrogramData(index);
+    }
+    //TODO add set functions (make QEnum in SpectrogramProvider Class for DRY?)
     property int cursorX: width / 2
     property int cursorStep: 5
 
@@ -17,24 +21,26 @@ Item {
 
         // Main spectrogram image + overlay
         Item {
-            Layout.fillWidth: true
+          id: hi
+             Layout.fillWidth: true
+
+             Layout.fillHeight: true
+             Layout.minimumHeight: 256
+             function renderNewSpectrogramData(index){
+               console.log("Got here");
+          spectrogram.loadNewSpectrogramData(index);
+        }
+
+
+        SpectrogramProvider {
+          id: spectrogram
+
+        anchors.fill: parent 
             Layout.fillHeight: true
-            Layout.minimumHeight: 256
-
-            Image {
-                id: spectrogramImage
-                anchors.fill: parent
-                source: "image://spectrogram/current"
-                cache: false
-                fillMode: Image.Stretch
-
-                function reload() {
-                    var src = source;
-                    source = "";
-                    source = src;
-                }
-            }
-
+            audioFilesModel: projectManager.audioFiles
+          
+            // Component.onCompleted: loadNewSpectrogramData(0)
+        }
             AnnotationOverlay {
                 id: overlay
                 anchors.fill: parent
@@ -46,29 +52,26 @@ Item {
                 onClicked: function(mouse) {
                     root.cursorX = mouse.x;
                     root.forceActiveFocus();
+                  }
+
+                onWheel: (wheel) => {
+                  console.log("Sroll!!!!!"); 
+
                 }
             }
         }
 
-        // Trace view below spectrogram
-        Image {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 60
-            source: "image://spectrogram/trace"
-            cache: false
-            fillMode: Image.Stretch
-        }
     }
 
     // Navigation label
-    Label {
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.margins: 8
-        text: "Page " + spectrogramController.navPage + " / " + spectrogramController.navMax
-        color: "#AAAAAA"
-        font.pixelSize: 12
-        background: Rectangle { color: "#80000000"; radius: 3 }
-        padding: 4
-    }
+    // Label {
+    //     anchors.top: parent.top
+    //     anchors.right: parent.right
+    //     anchors.margins: 8
+    //     text: "Page " + spectrogramController.navPage + " / " + spectrogramController.navMax
+    //     color: "#AAAAAA"
+    //     font.pixelSize: 12
+    //     background: Rectangle { color: "#80000000"; radius: 3 }
+    //     padding: 4
+    // }
 }
