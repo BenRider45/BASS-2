@@ -184,6 +184,8 @@ performSTFT(const std::vector<std::complex<T>> &data, int window_length,
   size_t n = data.size();
   assert(fftforemanutils::is_power_of_2(window_length) &&
          "Window length is now power of 2");
+  std::cerr << "Window_length: " << window_length << "\n Hop_size: " << hop_size
+            << "\n";
   assert(hop_size < window_length &&
          "Hop length must be smaller than window size");
   std::vector<std::complex<T>> outData;

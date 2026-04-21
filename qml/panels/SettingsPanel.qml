@@ -4,10 +4,11 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    signal xScaleChanged(int value)
-    signal yScaleChanged(int value)
-    signal x0Changed(int value)
-    signal y0Changed(int value)
+    signal xScaleChanged(double value)
+    signal yScaleChanged(double value)
+    signal x0Changed(double  value)
+    signal y0Changed(double value)
+    signal windowLengthChanged(int value)
     signal hopLengthChanged(int value)
     function getxScale() {
         return settingsGroup.xScale;
@@ -15,7 +16,7 @@ Item {
 
     function getyScale() {
         return settingsGroup.yScale;
-    }
+    }  
 
     function getX0() {
         return settingsGroup.x0;
@@ -25,7 +26,11 @@ Item {
     }
     function getHopLength() {
         return settingsGroup.hopLength;
-    }
+      }
+
+      function getWindowLength() {
+        return settingsGroup.windowLength;
+      }
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -109,6 +114,7 @@ Item {
                         property alias x0: x0Slider.value
                         property alias y0: y0Slider.value
                         property alias hopLength: hopLengthSlider.value
+                        property alias windowLength: windowLengthSpinBox.value
                         ColumnLayout {
                             Label {
                                 text: "Xscale"
@@ -117,11 +123,12 @@ Item {
                             Slider {
                                 id: xScaleSlider
                                 from: 0.1
-                                value: 1
-                                to: 10
-                                Layout.fillWidth: true
+
+                                value: 1.0
+                                to: 5
+
                                 onMoved: () => {
-                                    xscaleChanged(value);
+                                    xScaleChanged(value);
                                 }
                             }
                             Label {
@@ -131,24 +138,23 @@ Item {
                             Slider {
                                 id: yScaleSlider
                                 from: 0.1
-                                value: 1
-                                to: 10
-                                Layout.fillWidth: true
+                                value: 1.0
+                                to: 5
                                 onMoved: () => {
-                                    yscaleChanged(value);
+                                    yScaleChanged(value);
                                 }
                             }
-                            RowLayout {
+                            
                                 Label {
                                     text: "y0"
                                     color: "#DDD"
                                 }
                                 Slider {
                                     id: y0Slider
-                                    from: 0.1
-                                    value: 1
-                                    to: 10
-                                    Layout.fillWidth: true
+                                    from: -1000
+                                    value: 1.0
+                                    to: 1000
+
                                     onMoved: () => {
                                         y0Changed(value);
                                     }
@@ -160,29 +166,47 @@ Item {
                                 }
                                 Slider {
                                     id: x0Slider
-                                    from: 0.1
-                                    value: 1
-                                    to: 10
+                                    from: -1000
+                                    value: 1.0
+                                    to: 1000
                                     onMoved: () => {
                                         x0Changed(value);
                                     }
                                 }
-                            }
+                          
 
                             Label {
-                                text: "Hop Length"
+                                text: "Window Length (2^x)"
                                 color: "#DDD"
-                            }
+                              }
                             SpinBox {
-                                id: hopLengthSlider
-                                from: 64
-                                to: 1024
-                                value: 512
-                                stepSize: 64
-                                Layout.fillWidth: true
+                                id: windowLengthSpinBox
+                                from: 4
+                                to: 10
+                                value: 8
+                                stepSize: 1
                                 onValueModified: () => {
-                                    hopLengthChanged(value);
+                                  if(hopLengthSlider.value >= Math.pow(2,value)){
+                                    hopLengthSlider.setValue(Math.pow(2,value)-1);
+
+                                  }
+                                  windowLengthChanged(Math.pow(2, value));
+
                                 }
+                              }
+
+                            Label {
+                              text: "Hop Length: " + hopLengthSlider.value
+                              color: "#DDD"
+                            }
+                            SpinBox{
+                              id: hopLengthSlider
+                              from: windowLengthSpinBox.value <= 4 ? 1 : 8
+                              to: {Math.pow(2, windowLengthSpinBox.value) - 1}
+                              value: 8
+                              stepSize: 1
+                              onValueModified: () => {hopLengthChanged(value);}
+
                             }
                         }
                     }

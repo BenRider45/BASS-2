@@ -18,6 +18,9 @@ class SpectrogramProvider : public QQuickPaintedItem {
   Q_PROPERTY(double CONFIG_y0 READ y0 WRITE set_y0 NOTIFY RenderConfigChanged);
 
 public:
+  enum CONFIG_CHANGE_TYPE { XSCALE, YSCALE, X0, Y0, HOP_SIZE, WINDOW_LENGTH };
+  Q_ENUM(CONFIG_CHANGE_TYPE)
+
   explicit SpectrogramProvider(QQuickItem *parent = nullptr);
 
   void paint(QPainter *painter) override;
@@ -48,8 +51,47 @@ public:
     CONFIG_y0 = val;
     emit RenderConfigChanged();
   };
+  void set_hop_size(double val) {
+    std::cerr << "setting hop length\n";
+    CONFIG_hop_size = val;
+    emit RenderConfigChanged();
+  }
+  void set_window_length(double val) {
+    std::cerr << "setting window length\n";
+    CONFIG_window_length = val;
+    emit RenderConfigChanged();
+  }
   Q_INVOKABLE void loadNewSpectrogramData(int AudioFilesModelIndex);
+  Q_INVOKABLE void modify_CONFIG_value(double value, CONFIG_CHANGE_TYPE type) {
+    std::cerr << "Modding " << type << " to value " << value << " \n";
+    switch (type) {
+    case CONFIG_CHANGE_TYPE::XSCALE:
+      set_xscale(value);
+      break;
+    case CONFIG_CHANGE_TYPE::YSCALE:
+      set_yscale(value);
+      break;
+    case CONFIG_CHANGE_TYPE::X0:
+      set_x0(value);
+      break;
+    case CONFIG_CHANGE_TYPE::Y0:
+      set_y0(value);
+      break;
+    case CONFIG_CHANGE_TYPE::HOP_SIZE:
+      set_hop_size(value);
+      recomputeSpectrogram();
+      break;
+      // TODO implement re rendering STFT function
+    case CONFIG_CHANGE_TYPE::WINDOW_LENGTH:
+      std::cerr << "Got only call site for set_window_length\n";
+      set_window_length(value);
+      recomputeSpectrogram();
+      break;
+    }
 
+    update();
+    return;
+  }
   AudioFilesModel *audioFilesModel() const { return m_audioFilesModel; }
   void setAudioFilesModel(AudioFilesModel *model) {
     if (m_audioFilesModel == model)
@@ -57,22 +99,25 @@ public:
     m_audioFilesModel = model;
     emit audioFilesModelChanged();
   }
+  void recomputeSpectrogram();
 signals:
   void renderingStarted();
   void renderingFinished();
   void dataLoaded();
   void audioFilesModelChanged();
-
   void RenderConfigChanged();
 
 private:
   QwtPlotSpectrogram *m_spectrogram = new QwtPlotSpectrogram();
+  std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>> m_current_file;
   AudioFilesModel *m_audioFilesModel;
   QwtScaleMap m_xMap;
   QwtScaleMap m_yMap;
   double CONFIG_xscale = 1;
   double CONFIG_yscale = 1;
+  double CONFIG_hop_size = 8;
+  double CONFIG_window_length = 128;
   double CONFIG_color_scale;
-  double CONFIG_x0;
-  double CONFIG_y0;
+  double CONFIG_x0 = 0;
+  double CONFIG_y0 = 0;
 };

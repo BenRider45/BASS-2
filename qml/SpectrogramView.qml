@@ -3,12 +3,16 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import BASSGraphics 1.0
 import BASS
+
 Item {
     id: root
-    function renderNewFile(index){
-      hi.renderNewSpectrogramData(index);
+    function renderNewFile(index) {
+        hi.renderNewSpectrogramData(index);
     }
-    //TODO add set functions (make QEnum in SpectrogramProvider Class for DRY?)
+    function adjustSpectrogramProviderConfig(value, configOption) {
+      console.log("Got to external mod config function\n");
+      hi.modifySpectrogramProviderConfig(value, configOption);
+    }
     property int cursorX: width / 2
     property int cursorStep: 5
 
@@ -21,26 +25,30 @@ Item {
 
         // Main spectrogram image + overlay
         Item {
-          id: hi
-             Layout.fillWidth: true
+            id: hi
+            Layout.fillWidth: true
 
-             Layout.fillHeight: true
-             Layout.minimumHeight: 256
-             function renderNewSpectrogramData(index){
-               console.log("Got here");
-          spectrogram.loadNewSpectrogramData(index);
-        }
-
-
-        SpectrogramProvider {
-          id: spectrogram
-
-        anchors.fill: parent 
             Layout.fillHeight: true
-            audioFilesModel: projectManager.audioFiles
-          
-            // Component.onCompleted: loadNewSpectrogramData(0)
-        }
+            Layout.minimumHeight: 256
+            function renderNewSpectrogramData(index) {
+                console.log("Got here");
+                spectrogram.loadNewSpectrogramData(index);
+            }
+
+            function modifySpectrogramProviderConfig(value, configOption) {
+              console.log("Got to internal mod spec provider config function\n");
+              spectrogram.modify_CONFIG_value(value, configOption);
+            }
+
+            SpectrogramProvider {
+                id: spectrogram
+
+                anchors.fill: parent
+                Layout.fillHeight: true
+                audioFilesModel: projectManager.audioFiles
+
+                // Component.onCompleted: loadNewSpectrogramData(0)
+            }
             AnnotationOverlay {
                 id: overlay
                 anchors.fill: parent
@@ -49,18 +57,16 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: function(mouse) {
+                onClicked: function (mouse) {
                     root.cursorX = mouse.x;
                     root.forceActiveFocus();
-                  }
+                }
 
-                onWheel: (wheel) => {
-                  console.log("Sroll!!!!!"); 
-
+                onWheel: wheel => {
+                    console.log("Sroll!!!!!");
                 }
             }
         }
-
     }
 
     // Navigation label

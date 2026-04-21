@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
 import Constants 1.0
+import BASSGraphics 1.0
 import BASS
 
 ApplicationWindow {
@@ -208,12 +209,37 @@ ApplicationWindow {
                 ControlPanel {}
                 PlayerPanel {}
                 SettingsPanel {
+                    id: settingsPanel
+                    onXScaleChanged: function (value) {
+                        console.log("XScale Changed to ", value);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.XSCALE);
+                    }
+                    onYScaleChanged: function (value) {
+                        console.log("YScale Changed to ", value);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.YSCALE);
+                    }
 
-                    onXScaleChanged(int value) => {}
-                    onYScaleChanged(int value) => {}
-                    onX0Changed(int value) => {}
-                    onY0Changed(int value) => {}
-                    onHopLengthChanged(int value) => {}
+                    onX0Changed: function (value) {
+                        console.log("X0 Changed to ", value);
+
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.X0);
+                    }
+                    onY0Changed: function (value) {
+                        console.log("Y0 Changed to ", value);
+
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.Y0);
+                    }
+                    onHopLengthChanged: function (value) {
+                        console.log("Hop Length Changed to ", value);
+
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.HOP_SIZE);
+                      }
+
+                    onWindowLengthChanged: function (value){
+                      console.log("Window length changed to ", value);
+                      spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.WINDOW_LENGTH)
+                    }
+
                 }
             }
         }

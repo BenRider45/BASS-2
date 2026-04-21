@@ -3,11 +3,12 @@
 #include <QwtInterval>
 #include <QwtRasterData>
 #include <algorithm>
+#include <qwt_transform.h>
 template <typename T>
 class SpectrogramDataRasterInstance : public QwtRasterData {
 public:
   SpectrogramDataRasterInstance(fftforemanutils::STFT_DATA<T> data)
-      : m_data(data) {
+      : m_data(data), m_logTransform(QwtLogTransform()) {
 
     std::cerr << "Got into SpecDataRasterInst constrcutor \n";
     m_timeInterval = QwtInterval(0, m_data.columns());
@@ -19,7 +20,8 @@ public:
     assert(max != m_magData.end() && "Error finding max element");
     std::cerr << "found max element of " << *max << "\n";
 
-    m_magInterval = QwtInterval(100, *max / 1000);
+    m_magInterval = QwtInterval(m_logTransform.transform(100),
+                                m_logTransform.transform(*max));
 
     std::cerr << "Got m_magInterval\n";
   }
@@ -33,9 +35,9 @@ public:
     if (index < m_magData.size()) {
       // std::cerr << "value: for (" << col << "," << row
       //<< "): " << m_magData[index] << "\n";
-      return static_cast<double>(m_magData[index]);
+      return m_logTransform.transform(static_cast<double>(m_magData[index]));
     }
-    return 0;
+    return -100;
   }
 
   QwtInterval interval(Qt::Axis ax) const override {
@@ -55,4 +57,5 @@ private:
   QwtInterval m_timeInterval;
   QwtInterval m_freqInterval;
   QwtInterval m_magInterval;
+  QwtLogTransform m_logTransform;
 };
