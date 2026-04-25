@@ -10,9 +10,21 @@ Item {
         hi.renderNewSpectrogramData(index);
     }
     function adjustSpectrogramProviderConfig(value, configOption) {
-      console.log("Got to external mod config function\n");
-      hi.modifySpectrogramProviderConfig(value, configOption);
+        console.log("Got to external mod config function\n");
+        hi.modifySpectrogramProviderConfig(value, configOption);
     }
+    function crementSpectrogramProviderConfig(increment, step, configOption) {
+        if (increment) {
+            console.log("incrementing config");
+            hi.increaseSpectrogramProviderConfig(step, configOption);
+        } else {
+            hi.decreaseSpectrogramProviderConfig(step, configOption);
+        }
+    }
+    function getSpectrogramValue(configOption) {
+        return hi.getSpectrogramConfigValue(configOption);
+    }
+    signal spectrogramProviderConfigChanged(double value,  var configOption);
     property int cursorX: width / 2
     property int cursorStep: 5
 
@@ -36,8 +48,37 @@ Item {
             }
 
             function modifySpectrogramProviderConfig(value, configOption) {
-              console.log("Got to internal mod spec provider config function\n");
               spectrogram.modify_CONFIG_value(value, configOption);
+              spectrogramProviderConfigChanged(value, configOption);
+            }
+
+            function increaseSpectrogramProviderConfig(magnitude, configOption) {
+                spectrogram.crement_CONFIG_value(configOption, magnitude, true);
+                  
+               spectrogramProviderConfigChanged(getSpectrogramConfigValue(configOption) + magnitude, configOption);
+            }
+
+            function decreaseSpectrogramProviderConfig(magnitude, configOption) {
+                spectrogram.crement_CONFIG_value(configOption, magnitude, false);
+              
+               spectrogramProviderConfigChanged(getSpectrogramConfigValue(configOption) -magnitude, configOption);
+              }
+
+            function getSpectrogramConfigValue(configOption) {
+                switch (configOption) {
+                case SpectrogramProvider.CONFIG_TYPE.XSCALE:
+                    return spectrogram.CONFIG_xscale;
+                case SpectrogramProvider.CONFIG_TYPE.YSCALE:
+                    return spectrogram.CONFIG_yscale;
+                case SpectrogramProvider.CONFIG_TYPE.X0:
+                    return spectrogram.CONFIG_x0;
+                case SpectrogramProvider.CONFIG_TYPE.Y0:
+                    return spectrogram.CONFIG_y0;
+                case SpectrogramProvider.CONFIG_TYPE.HOP_SIZE:
+                    return spectrogram.CONFIG_hop_size;
+                case SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH:
+                    return spectrogram.CONFIG_window_length;
+                }
             }
 
             SpectrogramProvider {
@@ -56,15 +97,51 @@ Item {
             }
 
             MouseArea {
+                id: mouseArea
                 anchors.fill: parent
                 onClicked: function (mouse) {
                     root.cursorX = mouse.x;
                     root.forceActiveFocus();
                 }
-
+                cursorShape: Qt.PointingHandCursor
                 onWheel: wheel => {
-                    console.log("Sroll!!!!!");
+                    if (wheel.modifiers & Qt.ShiftModifier) {
+
+                        // if(wheel.angleDelta.y > 0){
+                        //     hi.increaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_CHANGE_TYPE.Y0);
+                        //   }
+                        //   else if (wheel.angleDelta.y < 0){
+                        //     hi.decreaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_CHANGE_TYPE.Y0);
+                        //   }
+
+                        if (wheel.angleDelta.x > 0) {
+                            hi.increaseSpectrogramProviderConfig(.1, SpectrogramProvider.CONFIG_TYPE.XScale);
+                        } else if (wheel.angleDelta.x < 0) {
+                            if (spectrogram.CONFIG_xscale <= 0) {
+                                hi.increaseSpectrogramProviderConfig(.1, SpectrogramProvider.CONFIG_TYPE.XScale);
+                            } else {
+                                hi.decreaseSpectrogramProviderConfig(.1, SpectrogramProvider.CONFIG_TYPE.XScale);
+                            }
+                        }
+                        // hi.modifySpectrogramProviderConfig(1 * wheel.angleDelta.y, SpectrogramProvider.CONFIG_TYPE.X0);
+                    } else {
+                        if (wheel.angleDelta.y < 0) {
+                            hi.increaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.Y0);
+                        } else if (wheel.angleDelta.y > 0) {
+                            hi.decreaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.Y0);
+                        }
+
+                        if (wheel.angleDelta.x < 0) {
+                            hi.increaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.X0);
+                        } else if (wheel.angleDelta.x > 0) {
+                            hi.decreaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.X0);
+                        }
+                        // hi.modifySpectrogramProviderConfig(1 * wheel.angleDelta.y, SpectrogramProvider.CONFIG_TYPE.X0);
+                    }
                 }
+                drag.target: spectrogram
+                drag.minimumX: 0
+                drag.maximumX: 1000
             }
         }
     }

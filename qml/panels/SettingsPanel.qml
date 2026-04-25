@@ -6,31 +6,53 @@ Item {
     id: root
     signal xScaleChanged(double value)
     signal yScaleChanged(double value)
-    signal x0Changed(double  value)
+    signal x0Changed(double value)
     signal y0Changed(double value)
     signal windowLengthChanged(int value)
     signal hopLengthChanged(int value)
     function getxScale() {
-        return settingsGroup.xScale;
+        return spectrogramSettingsGroup.xScale;
+    }
+    function setxScale(value) {
+   //     spectrogramSettingsGroup.xScaleSlider = value;
+    }
+    function getyScale() {
+        return spectrogramSettingsGroup.yScale;
     }
 
-    function getyScale() {
-        return settingsGroup.yScale;
-    }  
-
+    function setyScale(value) {
+  //      spectrogramSettingsGroup.yScaleSlider = value;
+    }
     function getX0() {
-        return settingsGroup.x0;
+        return spectrogramSettingsGroup.x0;
+    }
+
+    function setX0(value) {
+   //     spectrogramSettingsGroup.x0Slider = value;
     }
     function getY0() {
-        return settingsGroup.y0;
+        return spectrogramSettingsGroup.y0;
+    }
+
+    function setY0(value) {
+  //      spectrogramSettingsGroup.y0Slider = value;
     }
     function getHopLength() {
-        return settingsGroup.hopLength;
-      }
+        return spectrogramSettingsGroup.hopLength;
+    }
 
-      function getWindowLength() {
-        return settingsGroup.windowLength;
-      }
+    function setHopLength(value) {
+   //     spectrogramSettingsGroup.hopLengthSlider = value;
+    }
+
+    function getWindowLength() {
+        return spectrogramSettingsGroup.windowLength;
+    }
+
+    function setWindowLength(value) {
+   //   spectrogramSettingsGroup.windowLength = value;
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -105,7 +127,7 @@ Item {
                     }
 
                     GroupBox {
-                        id: settingsGroup
+                        id: spectrogramSettingsGroup
                         title: "Spectrogram"
                         Layout.fillWidth: true
                         Layout.margins: 8
@@ -115,9 +137,42 @@ Item {
                         property alias y0: y0Slider.value
                         property alias hopLength: hopLengthSlider.value
                         property alias windowLength: windowLengthSpinBox.value
+
+                        function revertViewConfigToDefault() {
+                              const xScaleDefault = 1.0
+                              const yScaleDefault = 1.0
+                              const x0Default = 0.0
+                              const y0Default = 0.0
+                                xScaleSlider.value = xScaleDefault
+                                yScaleSlider.value = yScaleDefault
+                                x0Slider.value = x0Default
+                                y0Slider.value = y0Default
+                                root.xScaleChanged(xScaleDefault);
+                                root.yScaleChanged(yScaleDefault);
+                                root.x0Changed(x0Default);
+                                root.y0Changed(y0Default);
+
+                              }
+                              function revertRenderConfigToDefault() {
+
+                                const hopSizeDefault = 8.0
+                                const windowSizeExpdefault = 8.0
+                                
+                                if(hopLengthSlider.value != hopSizeDefault){
+                                  hopLengthSlider.value = hopSizeDefault
+                                  root.hopLengthChanged(hopSizeDefault);
+                                }
+                                if(windowLengthSpinBox.value != windowSizeExpdefault){
+
+                                 windowLengthSpinBox.value = windowSizeExpdefault
+
+                                 root.windowLengthChanged(Math.pow(2, windowSizeExpdefault));
+                                }
+
+                              }
                         ColumnLayout {
                             Label {
-                                text: "Xscale"
+                                text: "Xscale: " + spectrogramSettingsGroup.xScale
                                 color: "#DDD"
                             }
                             Slider {
@@ -132,7 +187,8 @@ Item {
                                 }
                             }
                             Label {
-                                text: "Yscale"
+                                text: "Yscale: " + spectrogramSettingsGroup.yScale
+
                                 color: "#DDD"
                             }
                             Slider {
@@ -144,70 +200,86 @@ Item {
                                     yScaleChanged(value);
                                 }
                             }
-                            
-                                Label {
-                                    text: "y0"
-                                    color: "#DDD"
-                                }
-                                Slider {
-                                    id: y0Slider
-                                    from: -1000
-                                    value: 1.0
-                                    to: 1000
 
-                                    onMoved: () => {
-                                        y0Changed(value);
-                                    }
-                                }
+                            Label {
+                                text: "y0: " + spectrogramSettingsGroup.y0
+                                color: "#DDD"
+                            }
+                            Slider {
+                                id: y0Slider
+                                from: -1000
+                                value: 1.0
+                                to: 1000
 
-                                Label {
-                                    text: "x0"
-                                    color: "#DDD"
+                                onMoved: () => {
+                                    y0Changed(value / yScaleSlider.value);
                                 }
-                                Slider {
-                                    id: x0Slider
-                                    from: -1000
-                                    value: 1.0
-                                    to: 1000
-                                    onMoved: () => {
-                                        x0Changed(value);
-                                    }
+                            }
+
+                            Label {
+                                text: "x0: " + spectrogramSettingsGroup.x0
+                                color: "#DDD"
+                            }
+                            Slider {
+                                id: x0Slider
+                                from: -1000
+                                value: 1.0
+                                to: 1000
+                                onMoved: () => {
+                                    x0Changed(value / xScaleSlider.value);
                                 }
-                          
+                            }
 
                             Label {
                                 text: "Window Length (2^x)"
                                 color: "#DDD"
-                              }
+                            }
                             SpinBox {
-                                id: windowLengthSpinBox
+                              id: windowLengthSpinBox
                                 from: 4
                                 to: 10
                                 value: 8
                                 stepSize: 1
                                 onValueModified: () => {
-                                  if(hopLengthSlider.value >= Math.pow(2,value)){
-                                    hopLengthSlider.setValue(Math.pow(2,value)-1);
-
-                                  }
-                                  windowLengthChanged(Math.pow(2, value));
-
+                                    if (hopLengthSlider.value >= Math.pow(2, value)) {
+                                        hopLengthSlider.setValue(Math.pow(2, value) - 1);
+                                    }
+                                    windowLengthChanged(Math.pow(2, value));
                                 }
-                              }
+                            }
 
                             Label {
-                              text: "Hop Length: " + hopLengthSlider.value
-                              color: "#DDD"
+                                text: "Hop Length: " + hopLengthSlider.value
+                                color: "#DDD"
                             }
-                            SpinBox{
-                              id: hopLengthSlider
-                              from: windowLengthSpinBox.value <= 4 ? 1 : 8
-                              to: {Math.pow(2, windowLengthSpinBox.value) - 1}
-                              value: 8
-                              stepSize: 1
-                              onValueModified: () => {hopLengthChanged(value);}
+                            SpinBox {
+                                id: hopLengthSlider
+                                from: windowLengthSpinBox.value <= 4 ? 1 : 8
+                                to: {
+                                    Math.pow(2, windowLengthSpinBox.value) - 1;
+                                }
+                                value: 8
+                                stepSize: 1
+                                onValueModified: () => {
+                                    hopLengthChanged(value);
+                                }
+                            }
+
+                            Button {
+                              text: "Revert View To Default "
+                              onClicked: spectrogramSettingsGroup.revertViewConfigToDefault();
+                            }
+
+                            Button{
+                              text: "Revert Spectrogram Config to Default"
+                              onClicked: spectrogramSettingsGroup.revertRenderConfigToDefault();
+                            }
+
+                            Button{
+                              text: "Render Spectrogram"
 
                             }
+
                         }
                     }
                 }

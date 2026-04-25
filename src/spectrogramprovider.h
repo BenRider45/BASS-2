@@ -16,10 +16,13 @@ class SpectrogramProvider : public QQuickPaintedItem {
                  NOTIFY RenderConfigChanged);
   Q_PROPERTY(double CONFIG_x0 READ x0 WRITE set_x0 NOTIFY RenderConfigChanged);
   Q_PROPERTY(double CONFIG_y0 READ y0 WRITE set_y0 NOTIFY RenderConfigChanged);
-
+  Q_PROPERTY(double CONFIG_hop_size READ hop_size WRITE set_hop_size NOTIFY
+                 RenderConfigChanged)
+  Q_PROPERTY(double CONFIG_window_length READ window_length WRITE
+                 set_window_length NOTIFY RenderConfigChanged)
 public:
-  enum CONFIG_CHANGE_TYPE { XSCALE, YSCALE, X0, Y0, HOP_SIZE, WINDOW_LENGTH };
-  Q_ENUM(CONFIG_CHANGE_TYPE)
+  enum CONFIG_TYPE { XSCALE, YSCALE, X0, Y0, HOP_SIZE, WINDOW_LENGTH };
+  Q_ENUM(CONFIG_TYPE)
 
   explicit SpectrogramProvider(QQuickItem *parent = nullptr);
 
@@ -30,6 +33,8 @@ public:
   double color_scale() const { return CONFIG_color_scale; };
   double x0() const { return CONFIG_x0; };
   double y0() const { return CONFIG_y0; };
+  double hop_size() const { return CONFIG_hop_size; }
+  double window_length() const { return CONFIG_window_length; }
 
   void set_xscale(double val) {
     CONFIG_xscale = val;
@@ -62,28 +67,69 @@ public:
     emit RenderConfigChanged();
   }
   Q_INVOKABLE void loadNewSpectrogramData(int AudioFilesModelIndex);
-  Q_INVOKABLE void modify_CONFIG_value(double value, CONFIG_CHANGE_TYPE type) {
+  Q_INVOKABLE void crement_CONFIG_value(CONFIG_TYPE type, double crementValue,
+                                        bool increment = true) {
+    switch (type) {
+    case CONFIG_TYPE::XSCALE:
+      if (increment) {
+        modify_CONFIG_value(xscale() + crementValue, type);
+      } else {
+        modify_CONFIG_value(xscale() - crementValue, type);
+      }
+      break;
+
+    case CONFIG_TYPE::YSCALE:
+
+      if (increment) {
+        modify_CONFIG_value(yscale() + crementValue, type);
+      } else {
+        modify_CONFIG_value(yscale() - crementValue, type);
+      }
+      break;
+    case CONFIG_TYPE::X0:
+
+      if (increment) {
+        modify_CONFIG_value(x0() + crementValue, type);
+      } else {
+        modify_CONFIG_value(x0() - crementValue, type);
+      }
+      break;
+    case CONFIG_TYPE::Y0:
+
+      if (increment) {
+        modify_CONFIG_value(y0() + crementValue, type);
+      } else {
+        modify_CONFIG_value(y0() - crementValue, type);
+      }
+      break;
+
+    case CONFIG_TYPE::HOP_SIZE:
+      break;
+    case CONFIG_TYPE::WINDOW_LENGTH:
+      break;
+    }
+  }
+  Q_INVOKABLE void modify_CONFIG_value(double value, CONFIG_TYPE type) {
     std::cerr << "Modding " << type << " to value " << value << " \n";
     switch (type) {
-    case CONFIG_CHANGE_TYPE::XSCALE:
+    case CONFIG_TYPE::XSCALE:
       set_xscale(value);
       break;
-    case CONFIG_CHANGE_TYPE::YSCALE:
+    case CONFIG_TYPE::YSCALE:
       set_yscale(value);
       break;
-    case CONFIG_CHANGE_TYPE::X0:
+    case CONFIG_TYPE::X0:
       set_x0(value);
       break;
-    case CONFIG_CHANGE_TYPE::Y0:
+    case CONFIG_TYPE::Y0:
       set_y0(value);
       break;
-    case CONFIG_CHANGE_TYPE::HOP_SIZE:
+    case CONFIG_TYPE::HOP_SIZE:
       set_hop_size(value);
       recomputeSpectrogram();
       break;
       // TODO implement re rendering STFT function
-    case CONFIG_CHANGE_TYPE::WINDOW_LENGTH:
-      std::cerr << "Got only call site for set_window_length\n";
+    case CONFIG_TYPE::WINDOW_LENGTH:
       set_window_length(value);
       recomputeSpectrogram();
       break;
@@ -92,6 +138,7 @@ public:
     update();
     return;
   }
+
   AudioFilesModel *audioFilesModel() const { return m_audioFilesModel; }
   void setAudioFilesModel(AudioFilesModel *model) {
     if (m_audioFilesModel == model)
@@ -116,7 +163,7 @@ private:
   double CONFIG_xscale = 1;
   double CONFIG_yscale = 1;
   double CONFIG_hop_size = 8;
-  double CONFIG_window_length = 128;
+  double CONFIG_window_length = 256;
   double CONFIG_color_scale;
   double CONFIG_x0 = 0;
   double CONFIG_y0 = 0;

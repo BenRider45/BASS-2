@@ -212,34 +212,56 @@ ApplicationWindow {
                     id: settingsPanel
                     onXScaleChanged: function (value) {
                         console.log("XScale Changed to ", value);
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.XSCALE);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.XSCALE);
                     }
                     onYScaleChanged: function (value) {
                         console.log("YScale Changed to ", value);
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.YSCALE);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.YSCALE);
                     }
 
                     onX0Changed: function (value) {
                         console.log("X0 Changed to ", value);
 
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.X0);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.X0);
                     }
                     onY0Changed: function (value) {
                         console.log("Y0 Changed to ", value);
 
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.Y0);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.Y0);
                     }
                     onHopLengthChanged: function (value) {
                         console.log("Hop Length Changed to ", value);
 
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.HOP_SIZE);
-                      }
-
-                    onWindowLengthChanged: function (value){
-                      console.log("Window length changed to ", value);
-                      spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_CHANGE_TYPE.WINDOW_LENGTH)
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.HOP_SIZE);
                     }
 
+                    onWindowLengthChanged: function (value) {
+                        console.log("Window length changed to ", value);
+                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH);
+                      }
+                    function setConfigValue(value ,configOption){   
+				                switch (configOption) {
+				                case SpectrogramProvider.CONFIG_TYPE.XSCALE:
+                        settingsPanel.setxScale(value);
+                        break;
+                        case SpectrogramProvider.CONFIG_TYPE.YSCALE:
+                        settingsPanel.setyScale(value);
+                        break;
+				                case SpectrogramProvider.CONFIG_TYPE.X0: 
+                        settingsPanel.setX0(value);
+                        break;
+                        case SpectrogramProvider.CONFIG_TYPE.Y0:
+                        settingsPanel.setY0(value);
+                        break;
+                        case SpectrogramProvider.CONFIG_TYPE.HOP_SIZE:
+                        settingsPanel.setHopLength(value);
+                        break;
+                        case SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH:
+                        settingsPanel.setWindowLength(value);
+                        break;
+				                }
+                      
+                    }
                 }
             }
         }
@@ -259,12 +281,14 @@ ApplicationWindow {
                 SplitView.fillWidth: true
                 SplitView.minimumHeight: 256
                 focus: true
-
+                onSpectrogramProviderConfigChanged: function (value, configOption){
+                  settingsPanel.setConfigValue(value, configOption);
+                }
                 // Keyboard shortcuts
-                Keys.onLeftPressed: spectrogramController.prevPage()
-                Keys.onRightPressed: spectrogramController.nextPage()
-                Keys.onUpPressed: spectrogramController.setThreshold(spectrogramController.threshold + 0.01)
-                Keys.onDownPressed: spectrogramController.setThreshold(spectrogramController.threshold - 0.01)
+                Keys.onLeftPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.X0)
+                Keys.onRightPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.X0)
+                Keys.onUpPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
+                Keys.onDownPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
                 Keys.onReturnPressed: promptDialog.open()
 
                 Keys.onPressed: function (event) {
@@ -408,7 +432,20 @@ ApplicationWindow {
     // Show project init on first launch
     Component.onCompleted: {
         //if (!projectManager.isInitialized) {
+        syncSpectrogramSettingsPanelToSpectrogramProvider();
         projectSelectWindow.open();
         //}
     }
+
+    function syncSpectrogramSettingsPanelToSpectrogramProvider() {
+        settingsPanel.setxScale(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE));
+        settingsPanel.setyScale(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.YSCALE));
+        settingsPanel.setX0(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.X0));
+
+        settingsPanel.setY0(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.Y0));
+        
+        settingsPanel.setHopLength(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.HOP_SIZE));
+        
+        settingsPanel.setWindowLength(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH));
+      }
 }
