@@ -23,8 +23,15 @@ Item {
     }
     function getSpectrogramValue(configOption) {
         return hi.getSpectrogramConfigValue(configOption);
+      }
+      function reRender(){
+        hi.reRenderRequest();
+      }
+    function getDeltaTPerSample(){
+      return spectrogram.current_File_Delta_T_Per_Sample;
     }
     signal spectrogramProviderConfigChanged(double value,  var configOption);
+    signal currentFileDeltaTPerSampleChanged(double value);
     property int cursorX: width / 2
     property int cursorStep: 5
 
@@ -39,14 +46,16 @@ Item {
         Item {
             id: hi
             Layout.fillWidth: true
-
+            property alias spectrogram: spectrogram
             Layout.fillHeight: true
             Layout.minimumHeight: 256
             function renderNewSpectrogramData(index) {
                 console.log("Got here");
                 spectrogram.loadNewSpectrogramData(index);
             }
-
+            function reRenderRequest(){
+              spectrogram.recomputeSpectrogram();
+            }
             function modifySpectrogramProviderConfig(value, configOption) {
               spectrogram.modify_CONFIG_value(value, configOption);
               spectrogramProviderConfigChanged(value, configOption);
@@ -83,7 +92,9 @@ Item {
 
             SpectrogramProvider {
                 id: spectrogram
-
+                onCurrentFileDeltaTPerSampleChanged: function(value){
+                  root.currentFileDeltaTPerSampleChanged(value);
+                }
                 anchors.fill: parent
                 Layout.fillHeight: true
                 audioFilesModel: projectManager.audioFiles

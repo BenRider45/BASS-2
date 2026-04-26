@@ -39,9 +39,9 @@ void SpectrogramProvider::loadNewSpectrogramData(int audioFilesModelIndex) {
 
   m_spectrogram->setData(dataRaster.release());
   std::cerr << "set Data\n";
+  emit currentFileDeltaTPerSampleChanged(m_current_file->getDeltaTPerSample());
   update();
 }
-
 void SpectrogramProvider::recomputeSpectrogram() {
   std::cerr << "Recompyting Spectrogram for window len " << CONFIG_window_length
             << " and hop size " << CONFIG_hop_size << "\n";

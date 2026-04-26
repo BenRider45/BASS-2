@@ -10,13 +10,15 @@ Item {
     signal y0Changed(double value)
     signal windowLengthChanged(int value)
     signal hopLengthChanged(int value)
+    signal reRenderRequest()
+    property alias spectSettingsGroup: spectrogramSettingsGroup 
     function getxScale() {
         return spectrogramSettingsGroup.xScale;
     }
     function setxScale(value) {
    //     spectrogramSettingsGroup.xScaleSlider = value;
     }
-    function getyScale() {
+    function getyScale() {  
         return spectrogramSettingsGroup.yScale;
     }
 
@@ -51,7 +53,12 @@ Item {
 
     function setWindowLength(value) {
    //   spectrogramSettingsGroup.windowLength = value;
-    }
+ }
+
+ function setFileDeltaTPerSample(value){
+   spectSettingsGroup.deltaTPerSample = value;
+ }
+
 
     ColumnLayout {
         anchors.fill: parent
@@ -131,13 +138,14 @@ Item {
                         title: "Spectrogram"
                         Layout.fillWidth: true
                         Layout.margins: 8
+                        property var isDirty: false
+                        property var deltaTPerSample: 20
                         property alias xScale: xScaleSlider.value
                         property alias yScale: yScaleSlider.value
                         property alias x0: x0Slider.value
                         property alias y0: y0Slider.value
                         property alias hopLength: hopLengthSlider.value
                         property alias windowLength: windowLengthSpinBox.value
-
                         function revertViewConfigToDefault() {
                               const xScaleDefault = 1.0
                               const yScaleDefault = 1.0
@@ -151,7 +159,6 @@ Item {
                                 root.yScaleChanged(yScaleDefault);
                                 root.x0Changed(x0Default);
                                 root.y0Changed(y0Default);
-
                               }
                               function revertRenderConfigToDefault() {
 
@@ -172,7 +179,7 @@ Item {
                               }
                         ColumnLayout {
                             Label {
-                                text: "Xscale: " + spectrogramSettingsGroup.xScale
+                                text: "Xscale: " + Math.round(spectrogramSettingsGroup.xScale*100)/100;
                                 color: "#DDD"
                             }
                             Slider {
@@ -187,7 +194,7 @@ Item {
                                 }
                             }
                             Label {
-                                text: "Yscale: " + spectrogramSettingsGroup.yScale
+                                text: "Yscale: " + Math.round(spectrogramSettingsGroup.yScale*100)/100
 
                                 color: "#DDD"
                             }
@@ -198,11 +205,11 @@ Item {
                                 to: 5
                                 onMoved: () => {
                                     yScaleChanged(value);
-                                }
+                                  }
                             }
 
                             Label {
-                                text: "y0: " + spectrogramSettingsGroup.y0
+                                text: "y0: " + Math.round(spectrogramSettingsGroup.y0*100)/100
                                 color: "#DDD"
                             }
                             Slider {
@@ -217,7 +224,7 @@ Item {
                             }
 
                             Label {
-                                text: "x0: " + spectrogramSettingsGroup.x0
+                                text: "x0: " + Math.round(spectrogramSettingsGroup.x0*100)/100
                                 color: "#DDD"
                             }
                             Slider {
@@ -231,7 +238,7 @@ Item {
                             }
 
                             Label {
-                                text: "Window Length (2^x)"
+                                text: "Window Length (2^x) = " + Math.round(spectrogramSettingsGroup.deltaTPerSample*Math.pow(2, windowLengthSpinBox.value)*100000)/100 + " ms"
                                 color: "#DDD"
                             }
                             SpinBox {
@@ -245,16 +252,17 @@ Item {
                                         hopLengthSlider.setValue(Math.pow(2, value) - 1);
                                     }
                                     windowLengthChanged(Math.pow(2, value));
+                                    spectrogramSettingsGroup.isDirty = true;
                                 }
                             }
 
                             Label {
-                                text: "Hop Length: " + hopLengthSlider.value
+                                text: "Hop Length: " + Math.round(hopLengthSlider.value * spectrogramSettingsGroup.deltaTPerSample*100000)/100 + " ms"
                                 color: "#DDD"
                             }
                             SpinBox {
                                 id: hopLengthSlider
-                                from: windowLengthSpinBox.value <= 4 ? 1 : 8
+                                from: 1
                                 to: {
                                     Math.pow(2, windowLengthSpinBox.value) - 1;
                                 }
@@ -262,6 +270,7 @@ Item {
                                 stepSize: 1
                                 onValueModified: () => {
                                     hopLengthChanged(value);
+                                    spectrogramSettingsGroup.isDirty = true;
                                 }
                             }
 
@@ -276,8 +285,12 @@ Item {
                             }
 
                             Button{
-                              text: "Render Spectrogram"
-
+                              text: "Re Render Spectrogram"
+                              onClicked: () => {
+                                root.reRenderRequest();
+                                spectrogramSettingsGroup.isDirty = false; 
+                            }
+                              highlighted: spectrogramSettingsGroup.isDirty
                             }
 
                         }

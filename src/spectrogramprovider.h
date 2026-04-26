@@ -1,5 +1,4 @@
 #include "audioFilesModel.h"
-#include "datarasterfactory.h"
 #include <QtQuick/QQuickPaintedItem>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_scale_map.h>
@@ -17,9 +16,13 @@ class SpectrogramProvider : public QQuickPaintedItem {
   Q_PROPERTY(double CONFIG_x0 READ x0 WRITE set_x0 NOTIFY RenderConfigChanged);
   Q_PROPERTY(double CONFIG_y0 READ y0 WRITE set_y0 NOTIFY RenderConfigChanged);
   Q_PROPERTY(double CONFIG_hop_size READ hop_size WRITE set_hop_size NOTIFY
-                 RenderConfigChanged)
+                 RenderConfigChanged);
   Q_PROPERTY(double CONFIG_window_length READ window_length WRITE
-                 set_window_length NOTIFY RenderConfigChanged)
+                 set_window_length NOTIFY RenderConfigChanged);
+  Q_PROPERTY(
+      double current_File_Delta_T_Per_Sample READ currentFileDeltaTPerSample
+          NOTIFY currentFileDeltaTPerSampleChanged);
+
 public:
   enum CONFIG_TYPE { XSCALE, YSCALE, X0, Y0, HOP_SIZE, WINDOW_LENGTH };
   Q_ENUM(CONFIG_TYPE)
@@ -35,7 +38,9 @@ public:
   double y0() const { return CONFIG_y0; };
   double hop_size() const { return CONFIG_hop_size; }
   double window_length() const { return CONFIG_window_length; }
-
+  double currentFileDeltaTPerSample() const {
+    return m_current_file->getDeltaTPerSample();
+  }
   void set_xscale(double val) {
     CONFIG_xscale = val;
     emit RenderConfigChanged();
@@ -57,12 +62,12 @@ public:
     emit RenderConfigChanged();
   };
   void set_hop_size(double val) {
-    std::cerr << "setting hop length\n";
+    // std::cerr << "setting hop length\n";
     CONFIG_hop_size = val;
     emit RenderConfigChanged();
   }
   void set_window_length(double val) {
-    std::cerr << "setting window length\n";
+    //  std::cerr << "setting window length\n";
     CONFIG_window_length = val;
     emit RenderConfigChanged();
   }
@@ -110,7 +115,6 @@ public:
     }
   }
   Q_INVOKABLE void modify_CONFIG_value(double value, CONFIG_TYPE type) {
-    std::cerr << "Modding " << type << " to value " << value << " \n";
     switch (type) {
     case CONFIG_TYPE::XSCALE:
       set_xscale(value);
@@ -126,12 +130,12 @@ public:
       break;
     case CONFIG_TYPE::HOP_SIZE:
       set_hop_size(value);
-      recomputeSpectrogram();
+      // recomputeSpectrogram();
       break;
-      // TODO implement re rendering STFT function
     case CONFIG_TYPE::WINDOW_LENGTH:
+      //   std::cerr << "Got only call site for set_window_length\n";
       set_window_length(value);
-      recomputeSpectrogram();
+      // recomputeSpectrogram();
       break;
     }
 
@@ -146,13 +150,14 @@ public:
     m_audioFilesModel = model;
     emit audioFilesModelChanged();
   }
-  void recomputeSpectrogram();
+  Q_INVOKABLE void recomputeSpectrogram();
 signals:
   void renderingStarted();
   void renderingFinished();
   void dataLoaded();
   void audioFilesModelChanged();
   void RenderConfigChanged();
+  void currentFileDeltaTPerSampleChanged(double value);
 
 private:
   QwtPlotSpectrogram *m_spectrogram = new QwtPlotSpectrogram();

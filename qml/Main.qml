@@ -208,12 +208,16 @@ ApplicationWindow {
 
                 ControlPanel {}
                 PlayerPanel {}
+                //TODO This design is super clunky, the spectrogramView and SettingsPanel are so coupled together all of these function calls are redundant
+                //The Settings Panel needs refactored such that any component who needs a section in the setting panel OWN the front end to that settings panel.
+                //Perhaps an abstract settings Panel Module which allows for dynamic addition of settings? (list model!!!)
                 SettingsPanel {
                     id: settingsPanel
                     onXScaleChanged: function (value) {
                         console.log("XScale Changed to ", value);
                         spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.XSCALE);
                     }
+    
                     onYScaleChanged: function (value) {
                         console.log("YScale Changed to ", value);
                         spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.YSCALE);
@@ -261,8 +265,15 @@ ApplicationWindow {
                         break;
 				                }
                       
-                    }
-                }
+                      }
+                      onReRenderRequest: () => {
+                        spectrogramView.reRender(); 
+                      }
+
+
+
+                  
+                  }
             }
         }
     }
@@ -284,13 +295,18 @@ ApplicationWindow {
                 onSpectrogramProviderConfigChanged: function (value, configOption){
                   settingsPanel.setConfigValue(value, configOption);
                 }
+                onCurrentFileDeltaTPerSampleChanged: function (value) {
+
+                  settingsPanel.setFileDeltaTPerSample(value)
+
+                }
                 // Keyboard shortcuts
                 Keys.onLeftPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.X0)
                 Keys.onRightPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.X0)
                 Keys.onUpPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
                 Keys.onDownPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
                 Keys.onReturnPressed: promptDialog.open()
-
+                
                 Keys.onPressed: function (event) {
                     switch (event.key) {
                     case Qt.Key_D:
@@ -432,11 +448,13 @@ ApplicationWindow {
     // Show project init on first launch
     Component.onCompleted: {
         //if (!projectManager.isInitialized) {
-        syncSpectrogramSettingsPanelToSpectrogramProvider();
+          syncSpectrogramSettingsPanelToSpectrogramProvider();
+
         projectSelectWindow.open();
         //}
     }
 
+    
     function syncSpectrogramSettingsPanelToSpectrogramProvider() {
         settingsPanel.setxScale(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE));
         settingsPanel.setyScale(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.YSCALE));
