@@ -22,7 +22,6 @@ public:
       : _isDefault(false), _projectName(other._projectName),
         _projectDir(other._projectDir), _projectID(other._projectID),
         _lastAccessed(other._lastAccessed) {}
-
   ~RecentProject() = default;
   friend std::ostream &operator<<(std::ostream &os, const RecentProject &proj) {
     os << "PROJECT:\n"

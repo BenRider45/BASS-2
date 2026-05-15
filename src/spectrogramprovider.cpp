@@ -78,6 +78,7 @@ void SpectrogramProvider::paint(QPainter *painter) {
                         m_spectrogram->data()->interval(Qt::YAxis).maxValue());
 
   painter->scale(CONFIG_xscale, CONFIG_yscale);
+  painter->setClipRect(rect);
   m_spectrogram->draw(painter, xMap, yMap, rect);
 }
 // --- SpectrogramController ---

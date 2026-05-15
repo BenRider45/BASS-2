@@ -6,49 +6,51 @@
 #include <QVector>
 
 struct AnnotationFrame {
-    int startFrame = 0;
-    int endFrame = 0;
-    QString label;
-    int syllableId = -1;
+  int startFrame = -1;
+  int endFrame = -1;
+  QString label = "";
+  int syllableId = -1;
+  bool isPartial = false;
 };
 
-class AnnotationModel : public QAbstractListModel
-{
-    Q_OBJECT
-    Q_PROPERTY(QString currentFile READ currentFile WRITE setCurrentFile NOTIFY currentFileChanged)
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
+class AnnotationModel : public QAbstractListModel {
+  Q_OBJECT
+  Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
-    enum Roles {
-        StartFrameRole = Qt::UserRole + 1,
-        EndFrameRole,
-        LabelRole,
-        SyllableIdRole
-    };
+  enum Roles {
+    StartFrameRole = Qt::UserRole + 1,
+    EndFrameRole,
+    LabelRole,
+    SyllableIdRole,
+    isPartialRole
+  };
 
-    explicit AnnotationModel(QObject *parent = nullptr);
+  explicit AnnotationModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QHash<int, QByteArray> roleNames() const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QHash<int, QByteArray> roleNames() const override;
 
-    QString currentFile() const;
-    void setCurrentFile(const QString &file);
-    int count() const;
+  int count() const;
 
-    Q_INVOKABLE void addFrame(int start, int end, const QString &label);
-    Q_INVOKABLE void removeFrame(int index);
-    Q_INVOKABLE void editLabel(int index, const QString &newLabel);
-    Q_INVOKABLE void save();
-    Q_INVOKABLE void load(const QString &path);
+  Q_INVOKABLE int addFrame(const int start, const int end, const QString &label,
+                           bool isPartial);
+  Q_INVOKABLE int beginFrame(const int start);
+  Q_INVOKABLE void completeFrame(const int index, const int end);
+
+  Q_INVOKABLE void removeFrame(const int index);
+  Q_INVOKABLE void editLabel(const int index, const QString &newLabel);
+  Q_INVOKABLE void save();
+  Q_INVOKABLE void load(const QString &path);
 
 signals:
-    void currentFileChanged();
-    void countChanged();
+  void currentFileChanged();
+  void countChanged();
 
 private:
-    QVector<AnnotationFrame> m_frames;
-    QString m_currentFile;
+  QVector<AnnotationFrame> m_frames;
 };
 
 #endif // ANNOTATIONMODEL_H

@@ -217,10 +217,10 @@ ApplicationWindow {
                         console.log("XScale Changed to ", value);
                         spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.XSCALE);
                     }
-    
+
                     onYScaleChanged: function (value) {
                         console.log("YScale Changed to ", value);
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.YSCALE);
+                    //   spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.YSCALE);
                     }
 
                     onX0Changed: function (value) {
@@ -231,7 +231,7 @@ ApplicationWindow {
                     onY0Changed: function (value) {
                         console.log("Y0 Changed to ", value);
 
-                        spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.Y0);
+                    //  spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.Y0);
                     }
                     onHopLengthChanged: function (value) {
                         console.log("Hop Length Changed to ", value);
@@ -242,38 +242,33 @@ ApplicationWindow {
                     onWindowLengthChanged: function (value) {
                         console.log("Window length changed to ", value);
                         spectrogramView.adjustSpectrogramProviderConfig(value, SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH);
-                      }
-                    function setConfigValue(value ,configOption){   
-				                switch (configOption) {
-				                case SpectrogramProvider.CONFIG_TYPE.XSCALE:
-                        settingsPanel.setxScale(value);
-                        break;
+                    }
+                    function setConfigValue(value, configOption) {
+                        switch (configOption) {
+                        case SpectrogramProvider.CONFIG_TYPE.XSCALE:
+                            settingsPanel.setxScale(value);
+                            break;
                         case SpectrogramProvider.CONFIG_TYPE.YSCALE:
-                        settingsPanel.setyScale(value);
-                        break;
-				                case SpectrogramProvider.CONFIG_TYPE.X0: 
-                        settingsPanel.setX0(value);
-                        break;
+                            settingsPanel.setyScale(value);
+                            break;
+                        case SpectrogramProvider.CONFIG_TYPE.X0:
+                            settingsPanel.setX0(value);
+                            break;
                         case SpectrogramProvider.CONFIG_TYPE.Y0:
-                        settingsPanel.setY0(value);
-                        break;
+                            settingsPanel.setY0(value);
+                            break;
                         case SpectrogramProvider.CONFIG_TYPE.HOP_SIZE:
-                        settingsPanel.setHopLength(value);
-                        break;
+                            settingsPanel.setHopLength(value);
+                            break;
                         case SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH:
-                        settingsPanel.setWindowLength(value);
-                        break;
-				                }
-                      
-                      }
-                      onReRenderRequest: () => {
-                        spectrogramView.reRender(); 
-                      }
-
-
-
-                  
-                  }
+                            settingsPanel.setWindowLength(value);
+                            break;
+                        }
+                    }
+                    onReRenderRequest: () => {
+                        spectrogramView.reRender();
+                    }
+                }
             }
         }
     }
@@ -286,35 +281,55 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             orientation: Qt.Vertical
-
-            SpectrogramView {
-                id: spectrogramView
+            // Item {
+            // property alias spectrogramView: spectrogramView
+            Item {
+                id: spectrogramAnnotationScaffold
                 SplitView.fillWidth: true
                 SplitView.minimumHeight: 256
+                property alias spectrogramView: spectrogramView
+                property int annotationMode: 0
+                property int partialAnnotationIndex: 0
+                property int partialAnnotationBeginX: 0
                 focus: true
-                onSpectrogramProviderConfigChanged: function (value, configOption){
-                  settingsPanel.setConfigValue(value, configOption);
-                }
-                onCurrentFileDeltaTPerSampleChanged: function (value) {
 
-                  settingsPanel.setFileDeltaTPerSample(value)
-
-                }
-                // Keyboard shortcuts
                 Keys.onLeftPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.X0)
                 Keys.onRightPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.X0)
-                Keys.onUpPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
-                Keys.onDownPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
-                Keys.onReturnPressed: promptDialog.open()
-                
+                //Keys.onUpPressed: spectrogramView.crementSpectrogramProviderConfig(true, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
+                //Keys.onDownPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
+                Keys.onReturnPressed: function () {
+                    console.log("Current Annotation Mode: ", annotationMode);
+                    switch (annotationMode % 2) {
+                    case 0:
+                        partialAnnotationIndex = annotationModel.beginFrame((overlay.cursorX * overlay.x_scale) - overlay.x_0);
+                        partialAnnotationBeginX = overlay.cursorX;
+                        break;
+                    case 1:
+                        if (overlay.cursorX > partialAnnotationBeginX) {
+                            console.log("Valid End Frame");
+                            var index = (overlay.cursorX - overlay.x_0) * overlay.x_scale;
+                            annotationModel.completeFrame(partialAnnotationIndex, index);
+                            console.log("Index: ", index);
+                            promptDialog.modifyingIndex = partialAnnotationIndex;
+                            console.log("promptDialog.modifyingIndex: ", promptDialog.modifyingIndex);
+                            promptDialog.open();
+                            break;
+                        } else {
+                            annotationModel -= 1;
+                        }
+                        break;
+                    }
+
+                    annotationMode++;
+                }
                 Keys.onPressed: function (event) {
                     switch (event.key) {
                     case Qt.Key_D:
-                        spectrogramView.cursorX += spectrogramView.cursorStep;
+                        overlay.cursorX += spectrogramView.cursorStep;
                         event.accepted = true;
                         break;
                     case Qt.Key_A:
-                        spectrogramView.cursorX -= spectrogramView.cursorStep;
+                        overlay.cursorX -= spectrogramView.cursorStep;
                         event.accepted = true;
                         break;
                     case Qt.Key_C:
@@ -364,10 +379,41 @@ ApplicationWindow {
                         break;
                     }
                 }
-            }
+                SpectrogramView {
+                    id: spectrogramView
+                    focus: true
+                    anchors.fill: parent
+                    onSpectrogramProviderConfigChanged: function (value, configOption) {
+                        settingsPanel.setConfigValue(value, configOption);
+                    }
+                    onCurrentFileDeltaTPerSampleChanged: function (value) {
+                        settingsPanel.setFileDeltaTPerSample(value);
+                    }
+                    // Keyboard shortcuts
 
+                }
+                AnnotationOverlay {
+                    id: overlay
+                    cursorX: width / 2
+                    anchors.fill: parent
+                    SplitView.fillWidth: true
+                    SplitView.minimumHeight: 256
+                    x_0: spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.X0)
+                    x_scale: spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE)
+                }
+                MouseArea {
+                    id: spectrogramAnnotationScaffoldMouseArea
+                    anchors.fill: parent
+                    onClicked: function (mouse) {
+                        overlay.cursorX = mouse.x;
+                        console.log("curorX : ", overlay.cursorX);
+                        overlay.forceActiveFocus();
+                    }
+                }
+            }
             InfoBar {
-                Layout.fillWidth: true
+                //SplitView.Layout.fillWidth: true
+
                 SplitView.Layout.fillHeight: true
             }
         }
@@ -410,8 +456,10 @@ ApplicationWindow {
 
     PromptDialog {
         id: promptDialog
+        property int modifyingIndex: 0
         onLabelAccepted: function (label) {
-            annotationModel.addFrame(spectrogramView.cursorX, spectrogramView.cursorX + 100, label);
+            console.log("Modifying index: ", modifyingIndex);
+            annotationModel.editLabel(modifyingIndex, label);
         }
     }
 
@@ -448,22 +496,21 @@ ApplicationWindow {
     // Show project init on first launch
     Component.onCompleted: {
         //if (!projectManager.isInitialized) {
-          syncSpectrogramSettingsPanelToSpectrogramProvider();
+        syncSpectrogramSettingsPanelToSpectrogramProvider();
 
         projectSelectWindow.open();
         //}
     }
 
-    
     function syncSpectrogramSettingsPanelToSpectrogramProvider() {
-        settingsPanel.setxScale(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE));
-        settingsPanel.setyScale(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.YSCALE));
-        settingsPanel.setX0(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.X0));
+        settingsPanel.setxScale(spectrogramAnnotationScaffold.spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE));
+        settingsPanel.setyScale(spectrogramAnnotationScaffold.spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.YSCALE));
+        settingsPanel.setX0(spectrogramAnnotationScaffold.spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.X0));
 
-        settingsPanel.setY0(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.Y0));
-        
-        settingsPanel.setHopLength(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.HOP_SIZE));
-        
-        settingsPanel.setWindowLength(spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH));
-      }
+        settingsPanel.setY0(spectrogramAnnotationScaffold.spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.Y0));
+
+        settingsPanel.setHopLength(spectrogramAnnotationScaffold.spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.HOP_SIZE));
+
+        settingsPanel.setWindowLength(spectrogramAnnotationScaffold.spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.WINDOW_LENGTH));
+    }
 }

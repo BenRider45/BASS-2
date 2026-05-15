@@ -9,7 +9,7 @@ Rectangle {
     implicitHeight: 28
 
     property string leftText: projectManager.projectAttached ? projectManager.currentProjectBirdName + " — " + projectManager.currentProjectDir : "No project loaded"
-    property string rightText: "Annotations: " + annotationModel.count + "  |  Page: " + spectrogramController.navPage + "/" + spectrogramController.navMax
+//    property string rightText: "Annotations: " + annotationModel.count + "  |  Page: " + spectrogramController.navPage + "/" + spectrogramController.navMax
 
     RowLayout {
         anchors.fill: parent
@@ -24,12 +24,12 @@ Rectangle {
             Layout.fillWidth: true
         }
 
-        Label {
-            text: root.rightText
-            color: "#999999"
-            font.pixelSize: 12
-            horizontalAlignment: Text.AlignRight
-        }
+        // Label {
+        //     text: root.rightText
+        //     color: "#999999"
+        //     font.pixelSize: 12
+        //     horizontalAlignment: Text.AlignRight
+        // }
     }
 
     // Top border

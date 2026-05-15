@@ -23,15 +23,15 @@ Item {
     }
     function getSpectrogramValue(configOption) {
         return hi.getSpectrogramConfigValue(configOption);
-      }
-      function reRender(){
-        hi.reRenderRequest();
-      }
-    function getDeltaTPerSample(){
-      return spectrogram.current_File_Delta_T_Per_Sample;
     }
-    signal spectrogramProviderConfigChanged(double value,  var configOption);
-    signal currentFileDeltaTPerSampleChanged(double value);
+    function reRender() {
+        hi.reRenderRequest();
+    }
+    function getDeltaTPerSample() {
+        return spectrogram.current_File_Delta_T_Per_Sample;
+    }
+    signal spectrogramProviderConfigChanged(double value, var configOption)
+    signal currentFileDeltaTPerSampleChanged(double value)
     property int cursorX: width / 2
     property int cursorStep: 5
 
@@ -53,25 +53,25 @@ Item {
                 console.log("Got here");
                 spectrogram.loadNewSpectrogramData(index);
             }
-            function reRenderRequest(){
-              spectrogram.recomputeSpectrogram();
+            function reRenderRequest() {
+                spectrogram.recomputeSpectrogram();
             }
             function modifySpectrogramProviderConfig(value, configOption) {
-              spectrogram.modify_CONFIG_value(value, configOption);
-              spectrogramProviderConfigChanged(value, configOption);
+                spectrogram.modify_CONFIG_value(value, configOption);
+                spectrogramProviderConfigChanged(value, configOption);
             }
 
             function increaseSpectrogramProviderConfig(magnitude, configOption) {
                 spectrogram.crement_CONFIG_value(configOption, magnitude, true);
-                  
-               spectrogramProviderConfigChanged(getSpectrogramConfigValue(configOption) + magnitude, configOption);
+
+                spectrogramProviderConfigChanged(getSpectrogramConfigValue(configOption) + magnitude, configOption);
             }
 
             function decreaseSpectrogramProviderConfig(magnitude, configOption) {
                 spectrogram.crement_CONFIG_value(configOption, magnitude, false);
-              
-               spectrogramProviderConfigChanged(getSpectrogramConfigValue(configOption) -magnitude, configOption);
-              }
+
+                spectrogramProviderConfigChanged(getSpectrogramConfigValue(configOption) - magnitude, configOption);
+            }
 
             function getSpectrogramConfigValue(configOption) {
                 switch (configOption) {
@@ -92,25 +92,28 @@ Item {
 
             SpectrogramProvider {
                 id: spectrogram
-                onCurrentFileDeltaTPerSampleChanged: function(value){
-                  root.currentFileDeltaTPerSampleChanged(value);
+                onCurrentFileDeltaTPerSampleChanged: function (value) {
+                    root.currentFileDeltaTPerSampleChanged(value);
                 }
                 anchors.fill: parent
                 Layout.fillHeight: true
                 audioFilesModel: projectManager.audioFiles
 
-                // Component.onCompleted: loadNewSpectrogramData(0)
+                //    Component.onCompleted: loadNewSpectrogramData(0)
             }
-            AnnotationOverlay {
-                id: overlay
-                anchors.fill: parent
-                cursorX: root.cursorX
-            }
+            // AnnotationOverlay {
+            //     id: overlay
+            //     anchors.fill: parent
+            //     cursorX: root.cursorX
+            //     x_0: hi.getSpectrogramConfigValue(SpectrogramProvider.CONFIG_TYPE.X0)
+            //     x_scale: hi.getSpectrogramConfigValue(SpectrogramProvider.CONFIG_TYPE.XSCALE)
+            // }
 
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
                 onClicked: function (mouse) {
+                    console.log("onClicked in SpecrView\n");
                     root.cursorX = mouse.x;
                     root.forceActiveFocus();
                 }
@@ -137,9 +140,9 @@ Item {
                         // hi.modifySpectrogramProviderConfig(1 * wheel.angleDelta.y, SpectrogramProvider.CONFIG_TYPE.X0);
                     } else {
                         if (wheel.angleDelta.y < 0) {
-                            hi.increaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.Y0);
+                            //   hi.increaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.Y0);
                         } else if (wheel.angleDelta.y > 0) {
-                            hi.decreaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.Y0);
+                            //   hi.decreaseSpectrogramProviderConfig(5, SpectrogramProvider.CONFIG_TYPE.Y0);
                         }
 
                         if (wheel.angleDelta.x < 0) {

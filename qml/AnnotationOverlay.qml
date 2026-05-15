@@ -8,6 +8,8 @@ Item {
     property int cursorStepSize: 5
     property color cursorColor: "#FF4444"
     property color boundaryColor: "#44FF44"
+    property double x_0: 0.0
+    property double x_scale: 1.0
 
     // Cursor line
     Rectangle {
@@ -17,7 +19,7 @@ Item {
         width: 2
         height: parent.height
         color: root.cursorColor
-        opacity: 0.9
+        opacity: .9
     }
 
     // Annotation boundaries from model
@@ -27,29 +29,30 @@ Item {
         Item {
             // Left boundary
             Rectangle {
-                x: model.startFrame ? (model.startFrame / 10) % root.width : 0
+                x: ((model.startFrame % root.width) - root.x_0) * root.x_scale
                 y: 0
-                width: 1
+                width: 10
                 height: root.height
                 color: root.boundaryColor
-                opacity: 0.7
+                opacity: 1
             }
 
             // Right boundary
             Rectangle {
-                x: model.endFrame ? (model.endFrame / 10) % root.width : 0
+                x: ((model.endFrame % root.width) - root.x_0) * root.x_scale
                 y: 0
-                width: 1
+                width: 10
                 height: root.height
                 color: root.boundaryColor
-                opacity: 0.7
+                opacity: 1
+                visible: !model.isPartial
             }
 
             // Label
             Text {
-                x: model.startFrame ? (model.startFrame / 10) % root.width + 3 : 3
+                x: ((((model.endFrame + model.startFrame) / 2) % root.width) - root.x_0) * root.x_scale
                 y: 4
-                text: model.label || ""
+                text: model.label
                 color: "#FFFFFF"
                 font.pixelSize: 11
                 font.bold: true
