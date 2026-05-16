@@ -71,7 +71,7 @@ int AnnotationModel::beginFrame(const int start) {
 }
 
 void AnnotationModel::completeFrame(const int index, const int end) {
-  std::cerr << "In completeFrame with index: " << index << " and end: " << end
+  std::cerr << "In completeFrame ith index: " << index << " and end: " << end
             << "\n";
   if (index < 0 || index >= m_frames.size()) {
     return;

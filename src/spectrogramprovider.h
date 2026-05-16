@@ -34,6 +34,7 @@ public:
   double xscale() const { return CONFIG_xscale; };
   double yscale() const { return CONFIG_yscale; };
   double color_scale() const { return CONFIG_color_scale; };
+  int ScreenColumnToSampleIndex(double x);
   double x0() const { return CONFIG_x0; };
   double y0() const { return CONFIG_y0; };
   double hop_size() const { return CONFIG_hop_size; }

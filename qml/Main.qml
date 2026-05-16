@@ -20,7 +20,7 @@ ApplicationWindow {
     property bool isLoading: false
     property string projectName: projectManager.projectAttached ? projectManager.currentProjectName : "No Project"
     property string currentProjectDir: projectManager.projectAttached ? projectManager.currentProjectDir.absolutePath : "No project"
-
+    property bool deBUG: false
     Connections {
         target: projectManager
         function onProjectLoading(projectDir) {
@@ -84,6 +84,13 @@ ApplicationWindow {
                 text: "Toggle Control Panel"
                 shortcut: "Ctrl+2"
                 onTriggered: rightDrawer.visible ? rightDrawer.close() : rightDrawer.open()
+            }
+            Action {
+                text: "Toggle Debug Mode "
+                shortcut: "Ctrl+D"
+                onTriggered: () => {
+                    window.deBUG = !window.deBUG;
+                }
             }
         }
         Menu {
@@ -299,17 +306,21 @@ ApplicationWindow {
                 //Keys.onDownPressed: spectrogramView.crementSpectrogramProviderConfig(false, 5, SpectrogramProvider.CONFIG_TYPE.Y0)
                 Keys.onReturnPressed: function () {
                     console.log("Current Annotation Mode: ", annotationMode);
-                    switch (annotationMode % 2) {
+                    switch (annotationMode) {
                     case 0:
-                        partialAnnotationIndex = annotationModel.beginFrame((overlay.cursorX * overlay.x_scale) - overlay.x_0);
+                        console.log("Beginning annotation with cursor at: ", overlay.cursorX);
+                        //TODO Try saving scaling and x_0 for each annotation?
+                        //Applying those on render and then also current change? using the addition of both?
+                        partialAnnotationIndex = annotationModel.beginFrame((overlay.cursorX / overlay.x_scale) + overlay.x_0);
+
                         partialAnnotationBeginX = overlay.cursorX;
                         break;
                     case 1:
                         if (overlay.cursorX > partialAnnotationBeginX) {
                             console.log("Valid End Frame");
-                            var index = (overlay.cursorX - overlay.x_0) * overlay.x_scale;
+                            var index = (overlay.cursorX / overlay.x_scale) + overlay.x_0;
                             annotationModel.completeFrame(partialAnnotationIndex, index);
-                            console.log("Index: ", index);
+                            console.log("Index: ", overlay.cursorX);
                             promptDialog.modifyingIndex = partialAnnotationIndex;
                             console.log("promptDialog.modifyingIndex: ", promptDialog.modifyingIndex);
                             promptDialog.open();
@@ -320,7 +331,7 @@ ApplicationWindow {
                         break;
                     }
 
-                    annotationMode++;
+                    annotationMode = (annotationMode + 1) % 2;
                 }
                 Keys.onPressed: function (event) {
                     switch (event.key) {
@@ -400,6 +411,7 @@ ApplicationWindow {
                     SplitView.minimumHeight: 256
                     x_0: spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.X0)
                     x_scale: spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE)
+                    deBUG: window.deBUG
                 }
                 MouseArea {
                     id: spectrogramAnnotationScaffoldMouseArea

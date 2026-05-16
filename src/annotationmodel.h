@@ -11,6 +11,8 @@ struct AnnotationFrame {
   QString label = "";
   int syllableId = -1;
   bool isPartial = false;
+  // double x_0;
+  // double x_scale;
 };
 
 class AnnotationModel : public QAbstractListModel {
