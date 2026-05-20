@@ -50,15 +50,15 @@ void AudioFilesModel::clearModel() {
 
 std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>>
 AudioFilesModel::getAudioFile(int idx) {
-  std::cerr << "in getAudioFile \n looking for index " << idx << "\n";
-  std::cerr << "len:" << m_wavFiles.length();
-  for (auto file : m_wavFiles) {
-    std::cerr << "file: " << file.GetLengthInSeconds() << "\n";
-  }
+  // std::cerr << "in getAudioFile \n looking for index " << idx << "\n";
+  // std::cerr << "len:" << m_wavFiles.length();
+  // for (auto file : m_wavFiles) {
+  //   std::cerr << "file: " << file.GetLengthInSeconds() << "\n";
+  // }
   std::unique_ptr<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>> output =
       std::make_unique<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>>(
           m_wavFiles.at(idx));
-  std::cerr << "created unique_ptr \n";
+  // std::cerr << "created unique_ptr \n";
   return std::move(output);
 }
 
@@ -78,9 +78,9 @@ void AudioFilesModel::setCurrentFile(int idx) {
 Result<bool> AudioFilesModel::loadAudioFiles(
     const QVector<WavFile<SharedTypeDefs::WAVFILE_SAMPLE>> &AudioFiles) {
 
-  std::cerr
-      << "Got to loading AudioFiles in AudioFIles Model\n input arr length:"
-      << AudioFiles.size() << "\n";
+  // std::cerr
+  //     << "Got to loading AudioFiles in AudioFIles Model\n input arr length:"
+  //     << AudioFiles.size() << "\n";
   for (auto file : AudioFiles) {
     Result<bool> addRes = addAudioFile(file);
     if (!addRes.isSuccess()) {

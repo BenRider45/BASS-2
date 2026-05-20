@@ -13,7 +13,7 @@ int AnnotationModel::rowCount(const QModelIndex &parent) const {
 QVariant AnnotationModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid() || index.row() >= m_frames.size())
     return {};
-  std::cerr << "Getting frame " << index.row() << "\n";
+  // std::cerr << "Getting frame " << index.row() << "\n";
   const auto &frame = m_frames.at(index.row());
   switch (role) {
   case StartFrameRole:
@@ -67,7 +67,7 @@ void AnnotationModel::removeFrame(int index) {
 }
 
 void AnnotationModel::editLabel(int index, const QString &newLabel) {
-  std::cerr << "in edit label" << "\n";
+  // std::cerr << "in edit label" << "\n";
   if (index < 0 || index >= m_frames.size())
     return;
   m_frames[index].label = newLabel;
@@ -75,14 +75,14 @@ void AnnotationModel::editLabel(int index, const QString &newLabel) {
 }
 
 int AnnotationModel::beginFrame(const int start, QString fileName) {
-  std::cerr << "In beginFrame with start: " << start
-            << " at file: " << fileName.toStdString() << "\n";
+  //  std::cerr << "In beginFrame with start: " << start
+  //            << " at file: " << fileName.toStdString() << "\n";
   return addFrame(start, -1, "No Label", true, fileName);
 }
 
 void AnnotationModel::completeFrame(const int index, const int end) {
-  std::cerr << "In completeFrame ith index: " << index << " and end: " << end
-            << "\n";
+  // std::cerr << "In completeFrame ith index: " << index << " and end: " << end
+  //           << "\n";
   if (index < 0 || index >= m_frames.size()) {
     return;
   }

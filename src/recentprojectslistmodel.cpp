@@ -40,7 +40,7 @@ RecentProject RecentProjectsModel::getProject(QModelIndex idx) {
   QDateTime projectLA =
       QDateTime(data(idx, projectLastAccessedRole).value<QDateTime>());
   RecentProject proj(projectName, projectID, projectLA, projectDir);
-  std::cerr << proj << "\n";
+  // std::cerr << proj << "\n";
   return proj;
 }
 QHash<int, QByteArray> RecentProjectsModel::roleNames() const {
@@ -94,10 +94,10 @@ Result<bool> RecentProjectsModel::updateRecentProjectsFile() {
   QString RecentProjectsMetaFilePath = MetaManager::getMetaFilePath(
       RecentProjectsMetaDataDir,
       constants::SharedConstants::RECENT_PROJ_METAFILE_NAME);
-  std::cerr << "Got to updateRecentProjects\n";
+  // std::cerr << "Got to updateRecentProjects\n";
   for (auto proj : m_recentProjects) {
 
-    std::cerr << proj << "\n";
+    // std::cerr << proj << "\n";
     Result<bool> writeRes = MetaManager::writeData<RecentProject>(
         RecentProjectsMetaFilePath,
         proj._projectID.toString(QUuid::WithoutBraces), proj);
@@ -112,7 +112,7 @@ Result<bool> RecentProjectsModel::updateRecentProjectsFile() {
 }
 
 void RecentProjectsModel::onProjectOpened(RecentProject &openedProject) {
-  std::cerr << "Inside of onProjectOpened in RecentProjectsModel\n";
+  // std::cerr << "Inside of onProjectOpened in RecentProjectsModel\n";
 
   int indx = getIndexByUID(openedProject._projectID);
   openedProject._lastAccessed = QDateTime::currentDateTime();
@@ -120,16 +120,17 @@ void RecentProjectsModel::onProjectOpened(RecentProject &openedProject) {
     addProject(openedProject);
     return;
   }
-  std::cerr << "touching project at index: " << indx << "\n";
+  //  std::cerr << "touching project at index: " << indx << "\n";
 
   QModelIndex modIdx = index(indx, 0);
-  std::cerr << "Old Time:"
-            << data(modIdx, projectLastAccessedRole).toString().toStdString()
-            << "\n";
+  // std::cerr << "Old Time:"
+  //           << data(modIdx, projectLastAccessedRole).toString().toStdString()
+  //           << "\n";
 
   m_recentProjects[indx]._lastAccessed = QDateTime::currentDateTime();
   dataChanged(modIdx, modIdx, QList<int>(projectLastAccessedRole));
-  std::cerr << data(modIdx, projectLastAccessedRole).toString().toStdString();
+  // std::cerr << data(modIdx,
+  // projectLastAccessedRole).toString().toStdString();
 }
 
 QString RecentProjectsModel::projectName() const { return QString(); }

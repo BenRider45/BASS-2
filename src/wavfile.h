@@ -42,11 +42,11 @@ public:
   }
   QString getFileName() {
     if (m_filePath != "") {
-      std::cerr << "Getting File Name : "
-                << QFileInfo(QString::fromStdString(m_filePath))
-                       .fileName()
-                       .toStdString()
-                << "\n";
+      // std::cerr << "Getting File Name : "
+      //           << QFileInfo(QString::fromStdString(m_filePath))
+      //                  .fileName()
+      //                  .toStdString()
+      //           << "\n";
 
       return QFileInfo(QString::fromStdString(m_filePath)).fileName();
     }

@@ -88,10 +88,10 @@ Result<T> retrieveData(QString metaFilePath, QString key) {
   }
 
   QJsonObject metaData = doc.object();
-  std::cerr << "key amt: " << metaData.count() << "\n";
-  for (auto k : metaData.keys()) {
-    std::cerr << "Key: " << k.toStdString() << "\n";
-  }
+  // std::cerr << "key amt: " << metaData.count() << "\n";
+  // for (auto k : metaData.keys()) {
+  //   std::cerr << "Key: " << k.toStdString() << "\n";
+  // }
   if (!metaData.contains(key)) {
     return Result<T>::err(QString("Key not found: '%1'").arg(key), 1);
   }

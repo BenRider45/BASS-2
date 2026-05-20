@@ -59,21 +59,21 @@ bool createMetaFile(QDir directory, QString metaFileName) {
 bool VerifyMetaFileExistence(QDir directory) {
   QStringList lst;
   lst << "*" + constants::SharedConstants::META_FILE_EXTENSION;
-  std::cerr << "lst: " << lst[0].toStdString() << "\n";
+  // std::cerr << "lst: " << lst[0].toStdString() << "\n";
   directory.setNameFilters(lst);
   QStringList entryLst = directory.entryList();
 
-  std::cerr << "entryLst.length(): " << entryLst.length() << "\n";
-  for (auto item : entryLst) {
-    std::cerr << "Item: " << item.toStdString() << "\n";
-  }
+  // std::cerr << "entryLst.length(): " << entryLst.length() << "\n";
+  // for (auto item : entryLst) {
+  //  std::cerr << "Item: " << item.toStdString() << "\n";
+  // }
   return entryLst.length() > 0;
 }
 
 QString getMetaFilePath(QDir path, QString fileName) {
   // Get meta file path of specific name
-  std::cerr << "Getting file with name : " << fileName.toStdString()
-            << "\n From path : " << path.absolutePath().toStdString() << "\n";
+  // std::cerr << "Getting file with name : " << fileName.toStdString()
+  //        << "\n From path : " << path.absolutePath().toStdString() << "\n";
   assert(
       path.exists(fileName + constants::SharedConstants::META_FILE_EXTENSION));
   return path.filePath(fileName +
