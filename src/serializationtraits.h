@@ -1,6 +1,8 @@
 #pragma once
 
+#include "annotationmodel.h"
 #include "recentProject.h"
+#include "result.h"
 #include <QDateTime>
 #include <QDir>
 #include <QJsonArray>
@@ -26,6 +28,35 @@ public:
       throw std::runtime_error("QString: missing 'value' field");
     }
     return obj["value"].toString();
+  }
+};
+
+template <> class SerializationTraits<AnnotationFrame> {
+public:
+  static QJsonObject serialize(const AnnotationFrame &frame) {
+    QJsonObject obj;
+    obj["StartFrame"] = frame.startFrame;
+    obj["EndFrame"] = frame.endFrame;
+    obj["Label"] = frame.label;
+    obj["FileName"] = frame.fileName;
+    obj["SyllableId"] = frame.syllableId.toString(QUuid::WithoutBraces);
+    obj["IsPartial"] = frame.isPartial;
+    return obj;
+  }
+  static AnnotationFrame deserialize(const QJsonObject &obj) {
+    if (!obj.contains("StartFrame") || !obj.contains("EndFrame") ||
+        !obj.contains("Label") || !obj.contains("FileName") ||
+        !obj.contains("SyllableId") || !obj.contains("IsPartial")) {
+      throw std::runtime_error(
+          "AnnotationFrame: missing field on input object");
+    }
+    AnnotationFrame frame;
+    frame.endFrame = obj["EndFrame"].toInteger();
+    frame.startFrame = obj["StartFrame"].toInteger();
+    frame.label = obj["Label"].toString();
+    frame.fileName = obj["FileName"].toString();
+    frame.syllableId = QUuid::fromString(obj["SyllableId"].toString());
+    return frame;
   }
 };
 

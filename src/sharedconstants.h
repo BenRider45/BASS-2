@@ -43,6 +43,8 @@ public:
   static inline const QString EMPTY_PROJECT_NAME{"EMPTY_PROJECT_NAME"};
   static inline const QString DEFAULT_BIRD_NAME{"Tweety Bird"};
   static inline const QString PROJECT_AUDIO_DIRECTORY_NAME{"Audio"};
+  static inline const QString PROJECT_ANNOTATIONS_FILE_NAME{"Annotations"};
+  static inline const QString PROJECT_ANNOTATIONS_FOLDER_NAME{"Annotations"};
 };
 } // namespace constants
   //

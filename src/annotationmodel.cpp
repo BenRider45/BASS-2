@@ -1,4 +1,5 @@
 #include "annotationmodel.h"
+#include "metamanager.h"
 #include <iostream>
 AnnotationModel::AnnotationModel(QObject *parent)
     : QAbstractListModel(parent) {}
@@ -12,7 +13,7 @@ int AnnotationModel::rowCount(const QModelIndex &parent) const {
 QVariant AnnotationModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid() || index.row() >= m_frames.size())
     return {};
-
+  std::cerr << "Getting frame " << index.row() << "\n";
   const auto &frame = m_frames.at(index.row());
   switch (role) {
   case StartFrameRole:
@@ -40,10 +41,17 @@ QHash<int, QByteArray> AnnotationModel::roleNames() const {
 
 int AnnotationModel::count() const { return m_frames.size(); }
 
+void AnnotationModel::clearModel() {
+  beginResetModel();
+  m_frames.clear();
+  endResetModel();
+}
+
 int AnnotationModel::addFrame(int start, int end, const QString &label,
                               bool isPartial, QString fileName) {
   beginInsertRows(QModelIndex(), m_frames.size(), m_frames.size());
-  m_frames.append({start, end, label, -1, isPartial, fileName});
+  m_frames.append(
+      {start, end, label, QUuid::createUuid(), isPartial, fileName});
   endInsertRows();
   emit countChanged();
   return m_frames.size() - 1;
@@ -87,10 +95,19 @@ void AnnotationModel::save() {
   // Skeleton: would write annotations to file
 }
 
+QVector<AnnotationFrame> AnnotationModel::getData() { return m_frames; }
 void AnnotationModel::load(const QString &path) {
-  Q_UNUSED(path);
-  beginResetModel();
-  m_frames.clear();
-  endResetModel();
-  emit countChanged();
+
+  clearModel();
+  QJsonObject data = MetaManager::extractMetaDataContent(path);
+  emit beginInsertRows(QModelIndex(), 0, data.keys().size() - 1);
+  for (const auto &key : data.keys()) {
+    Result<AnnotationFrame> frame =
+        MetaManager::retrieveData<AnnotationFrame>(path, key);
+    if (frame.isSuccess()) {
+      m_frames.append(frame.value());
+    }
+  }
+  emit endInsertRows();
+  return;
 }

@@ -41,7 +41,7 @@ Item {
     }
     // Annotation boundaries from model
     Repeater {
-        model: annotationModel
+        model: projectManager.annotationsModel
 
         Item {
             // Left boundary
@@ -52,6 +52,7 @@ Item {
                 height: root.height
                 color: root.boundaryColor
                 opacity: 1
+
                 visible: model.fileName == root.currentFileName
             }
 

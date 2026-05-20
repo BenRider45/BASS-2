@@ -1,21 +1,19 @@
-#ifndef ANNOTATIONMODEL_H
-#define ANNOTATIONMODEL_H
-
+#pragma once
 #include <QAbstractListModel>
 #include <QString>
+#include <QUUid>
 #include <QVector>
-
 struct AnnotationFrame {
   int startFrame = -1;
   int endFrame = -1;
   QString label = "";
-  int syllableId = -1;
+  QUuid syllableId;
   bool isPartial = false;
   QString fileName = "";
   // double x_0;
   // double x_scale;
 };
-
+// Q_DECLARE_METATYPE(AnnotationFrame)
 class AnnotationModel : public QAbstractListModel {
   Q_OBJECT
   Q_PROPERTY(int count READ count NOTIFY countChanged)
@@ -38,7 +36,7 @@ public:
   QHash<int, QByteArray> roleNames() const override;
 
   int count() const;
-
+  QVector<AnnotationFrame> getData();
   Q_INVOKABLE int addFrame(const int start, const int end, const QString &label,
                            bool isPartial, QString fileName);
   Q_INVOKABLE int beginFrame(const int start, QString fileName);
@@ -48,7 +46,7 @@ public:
   Q_INVOKABLE void editLabel(const int index, const QString &newLabel);
   Q_INVOKABLE void save();
   Q_INVOKABLE void load(const QString &path);
-
+  void clearModel();
 signals:
   void currentFileChanged();
   void countChanged();
@@ -56,5 +54,3 @@ signals:
 private:
   QVector<AnnotationFrame> m_frames;
 };
-
-#endif // ANNOTATIONMODEL_H

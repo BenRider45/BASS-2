@@ -64,7 +64,7 @@ ApplicationWindow {
             Action {
                 text: "Save"
                 shortcut: "Ctrl+S"
-                onTriggered: annotationModel.save()
+                onTriggered: projectManager.saveCurrentProject()
             }
             MenuSeparator {}
             Action {
@@ -312,7 +312,7 @@ ApplicationWindow {
                     switch (annotationMode) {
                     case 0:
                         console.log("Beginning annotation with cursor at: ", overlay.cursorX);
-                        partialAnnotationIndex = annotationModel.beginFrame((overlay.cursorX / overlay.x_scale) + overlay.x_0, overlay.currentFileName);
+                        partialAnnotationIndex = projectManager.annotationsModel.beginFrame((overlay.cursorX / overlay.x_scale) + overlay.x_0, overlay.currentFileName);
 
                         partialAnnotationBeginX = overlay.cursorX;
                         break;
@@ -320,14 +320,14 @@ ApplicationWindow {
                         if (overlay.cursorX > partialAnnotationBeginX) {
                             console.log("Valid End Frame");
                             var index = (overlay.cursorX / overlay.x_scale) + overlay.x_0;
-                            annotationModel.completeFrame(partialAnnotationIndex, index);
+                            projectManager.annotationsModel.completeFrame(partialAnnotationIndex, index);
                             console.log("Index: ", overlay.cursorX);
                             promptDialog.modifyingIndex = partialAnnotationIndex;
                             console.log("promptDialog.modifyingIndex: ", promptDialog.modifyingIndex);
                             promptDialog.open();
                             break;
                         } else {
-                            annotationModel -= 1;
+                            annotationMode -= 1;
                         }
                         break;
                     }
@@ -473,7 +473,7 @@ ApplicationWindow {
         property int modifyingIndex: 0
         onLabelAccepted: function (label) {
             console.log("Modifying index: ", modifyingIndex);
-            annotationModel.editLabel(modifyingIndex, label);
+            projectManager.annotationsModel.editLabel(modifyingIndex, label);
         }
     }
 

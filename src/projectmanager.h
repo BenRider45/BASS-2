@@ -1,6 +1,7 @@
 #ifndef PROJECTMANAGER_H
 #define PROJECTMANAGER_H
 
+#include "annotationmodel.h"
 #include "audioFilesModel.h"
 #include "bassproject.h"
 #include "recentProject.h"
@@ -30,7 +31,8 @@ class ProjectManager : public QObject {
                  recentProjectsModelChanged);
   Q_PROPERTY(
       AudioFilesModel *audioFiles READ audioFiles NOTIFY audioFilesModelChanged)
-
+  Q_PROPERTY(AnnotationModel *annotationsModel READ annotationsModel NOTIFY
+                 annotationsModelChanged)
 public:
   explicit ProjectManager(QObject *parent = nullptr);
   ~ProjectManager();
@@ -47,6 +49,7 @@ public:
   bassproject::projectMetaPackage projectMetadata() const;
 
   RecentProjectsModel *recentProjects();
+  AnnotationModel *annotationsModel();
   AudioFilesModel *audioFiles();
   void buildProjectDirectory(const QString &ProjDir);
   Q_INVOKABLE void initProject(const QString &projectDir,
@@ -54,8 +57,10 @@ public:
                                const QString &birdName);
 
   Q_INVOKABLE void loadProject(const QString &projDir);
+  Q_INVOKABLE void saveCurrentProject();
   Q_INVOKABLE void loadRecentProject(const QString &UID);
   Q_INVOKABLE void importWavFiles(const QString &wavDir);
+
   void setProjectAttached(bool val) {
     qDebug() << "Got to setProjectsAttached\n";
     m_projectAttached = val;
@@ -78,6 +83,7 @@ signals:
   void currentProjectDirChanged();
   void currentProjectNameChanged();
   void currentProjectBirdNameChanged();
+  void annotationsModelChanged();
 
 private:
   QString m_birdName;
@@ -85,6 +91,7 @@ private:
   QString m_wavDir;
   RecentProjectsModel m_recentProjects;
   AudioFilesModel m_audioFilesModel;
+  AnnotationModel m_annotationsModel;
   WavSurfer<SharedTypeDefs::WAVFILE_SAMPLE> m_wavSurfer;
   bool m_isInitialized = false;
   bool m_projectAttached = false;
@@ -94,6 +101,9 @@ private:
   void updateRecentProjectsFile();
   void updateAudioFileModel(QString projPath);
   void initAudioFileModel(QString projPath);
+  void initAnnotationsModel(QString projPath);
+  void loadAnnotations(QString projPath);
+  void saveAnnotations();
   void setCurrentProject(std::unique_ptr<BassProject> bassProj);
   QJsonObject
   fromProjectMetaToJson(bassproject::projectMetaPackage metaPackage);

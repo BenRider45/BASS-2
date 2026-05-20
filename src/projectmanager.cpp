@@ -1,5 +1,6 @@
 
 #include "projectmanager.h"
+#include "annotationmodel.h"
 #include "audioFilesModel.h"
 #include "bassproject.h"
 #include "metamanager.h"
@@ -95,6 +96,13 @@ void ProjectManager::updateRecentProjectsFile() {
   RecentProjectsDirty = false;
 }
 
+void ProjectManager::saveCurrentProject() {
+  updateRecentProjectsFile();
+
+  saveAnnotations();
+  // QVector<AnnotationFrame> frames = annotationModel
+}
+
 bassproject::projectMetaPackage ProjectManager::projectMetadata() const {
   return m_currentProject->_projMetaData;
 }
@@ -105,6 +113,10 @@ QString ProjectManager::wavDir() const { return m_wavDir; }
 
 RecentProjectsModel *ProjectManager::recentProjects() {
   return &m_recentProjects;
+}
+
+AnnotationModel *ProjectManager::annotationsModel() {
+  return &m_annotationsModel;
 }
 
 AudioFilesModel *ProjectManager::audioFiles() { return &m_audioFilesModel; }
@@ -182,7 +194,18 @@ void ProjectManager::loadProject(const QString &projDir) {
   emit projectLoading(QString(proj._projectName));
   updateRecentProjects(proj);
   updateRecentProjectsFile();
+
+  QDir annotationsFolder(bassProj->_projMetaData.projectDir.filePath(
+      constants::SharedConstants::PROJECT_ANNOTATIONS_FOLDER_NAME));
+
+  if (!MetaManager::VerifyMetaFileExistence(annotationsFolder)) {
+    MetaManager::createMetaFile(
+        annotationsFolder,
+        constants::SharedConstants::PROJECT_ANNOTATIONS_FILE_NAME);
+  }
+
   initAudioFileModel(bassProj->_projMetaData.projectDir.absolutePath());
+  loadAnnotations(bassProj->_projMetaData.projectDir.absolutePath());
   setCurrentProject(std::move(bassProj));
 
   setProjectAttached(true);
@@ -264,6 +287,44 @@ void ProjectManager::initAudioFileModel(QString projPath) {
   updateAudioFileModel(projPath);
 }
 
+void ProjectManager::initAnnotationsModel(QString projPath) {
+  m_annotationsModel.clearModel();
+  emit annotationsModelChanged();
+  loadAnnotations(projPath);
+}
+
+void ProjectManager::loadAnnotations(QString projPath) {
+  std::cerr << "Got to load Annotations\n";
+  QDir projDir(projPath);
+  projDir.cd(constants::SharedConstants::PROJECT_ANNOTATIONS_FOLDER_NAME);
+  QFile annotationsFile(projDir.filePath(
+      constants::SharedConstants::PROJECT_ANNOTATIONS_FILE_NAME +
+      constants::SharedConstants::META_FILE_EXTENSION));
+  m_annotationsModel.load(QFileInfo(annotationsFile).absoluteFilePath());
+  std::cerr << "m_annotationModel Data Length: "
+            << m_annotationsModel.getData().size();
+  emit annotationsModelChanged();
+}
+
+void ProjectManager::saveAnnotations() {
+  std::cerr << "Saving Annotations\n";
+  if (!m_currentProject) {
+    return;
+  }
+  QVector<AnnotationFrame> frames = m_annotationsModel.getData();
+  std::cerr << "We have " << frames.size() << " annotations!\n";
+  QDir annotationsFolder(m_currentProject->_projMetaData.projectDir.filePath(
+      constants::SharedConstants::PROJECT_ANNOTATIONS_FOLDER_NAME));
+
+  QFile annotationsFile(annotationsFolder.filePath(
+      constants::SharedConstants::PROJECT_ANNOTATIONS_FILE_NAME +
+      constants::SharedConstants::META_FILE_EXTENSION));
+  for (const auto &frame : frames) {
+    MetaManager::writeData<AnnotationFrame>(
+        QFileInfo(annotationsFile).absoluteFilePath(),
+        frame.syllableId.toString(QUuid::WithoutBraces), frame);
+  }
+}
 QJsonObject ProjectManager::fromProjectMetaToJson(
     bassproject::projectMetaPackage metaPackage) {
 

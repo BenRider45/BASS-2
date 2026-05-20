@@ -25,11 +25,9 @@ int main(int argc, char *argv[]) {
 
   // Create and register singleton instances
   ProjectManager projectManager;
-  AnnotationModel annotationModel;
   FileListModel fileListModel;
   AudioPlayer audioPlayer;
   engine.rootContext()->setContextProperty("projectManager", &projectManager);
-  engine.rootContext()->setContextProperty("annotationModel", &annotationModel);
   engine.rootContext()->setContextProperty("fileListModel", &fileListModel);
   engine.rootContext()->setContextProperty("audioPlayer", &audioPlayer);
   qmlRegisterType<SpectrogramProvider>("BASSGraphics", 1, 0,

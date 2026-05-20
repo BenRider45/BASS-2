@@ -78,7 +78,6 @@ int RecentProjectsModel::getIndexByUID(const QUuid &uid) {
       return i;
     }
   }
-
   return -1;
 }
 void RecentProjectsModel::setProjectName(QString projectName) {

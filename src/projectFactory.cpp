@@ -101,6 +101,14 @@ void buildProjectDirectoryStructure(QDir projectDirectory) {
   projectDirectory.mkpath("Models");
   projectDirectory.mkpath("Annotations");
   projectDirectory.mkpath("Notes");
+  projectDirectory.cd("Annotations");
+  QFile annotationFile(projectDirectory.filePath(
+      constants::SharedConstants::PROJECT_ANNOTATIONS_FILE_NAME +
+      constants::SharedConstants::META_FILE_EXTENSION));
+  if (annotationFile.open(QIODevice::WriteOnly)) {
+    std::cerr << "Annotation File Successfully Opened\n";
+  };
+
   return;
 }
 
