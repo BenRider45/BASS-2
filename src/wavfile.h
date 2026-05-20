@@ -1,6 +1,8 @@
 #pragma once
 #include "dependencies/AudioFile/AudioFile.h"
+#include <QFileInfo>
 #include <QJsonObject>
+#include <QString>
 #include <QVector>
 #include <string>
 #include <type_traits>
@@ -38,7 +40,18 @@ public:
   bool operator==(const WavFile<T> &other) const {
     return m_filePath == other.m_filePath;
   }
+  QString getFileName() {
+    if (m_filePath != "") {
+      std::cerr << "Getting File Name : "
+                << QFileInfo(QString::fromStdString(m_filePath))
+                       .fileName()
+                       .toStdString()
+                << "\n";
 
+      return QFileInfo(QString::fromStdString(m_filePath)).fileName();
+    }
+    return "";
+  }
   AudioFile<T> m_AudioFile;
 };
 

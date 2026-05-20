@@ -1,4 +1,5 @@
 #include "audioFilesModel.h"
+#include <QString>
 #include <QtQuick/QQuickPaintedItem>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_scale_map.h>
@@ -22,6 +23,8 @@ class SpectrogramProvider : public QQuickPaintedItem {
   Q_PROPERTY(
       double current_File_Delta_T_Per_Sample READ currentFileDeltaTPerSample
           NOTIFY currentFileDeltaTPerSampleChanged);
+  Q_PROPERTY(QString currentFileName READ currentFileName NOTIFY
+                 currentFileNameChanged);
 
 public:
   enum CONFIG_TYPE { XSCALE, YSCALE, X0, Y0, HOP_SIZE, WINDOW_LENGTH };
@@ -34,6 +37,12 @@ public:
   double xscale() const { return CONFIG_xscale; };
   double yscale() const { return CONFIG_yscale; };
   double color_scale() const { return CONFIG_color_scale; };
+  QString currentFileName() const {
+    if (m_current_file) {
+      return m_current_file->getFileName();
+    }
+    return QString();
+  }
   int ScreenColumnToSampleIndex(double x);
   double x0() const { return CONFIG_x0; };
   double y0() const { return CONFIG_y0; };
@@ -159,6 +168,7 @@ signals:
   void audioFilesModelChanged();
   void RenderConfigChanged();
   void currentFileDeltaTPerSampleChanged(double value);
+  void currentFileNameChanged();
 
 private:
   QwtPlotSpectrogram *m_spectrogram = new QwtPlotSpectrogram();

@@ -38,6 +38,7 @@ void SpectrogramProvider::loadNewSpectrogramData(int audioFilesModelIndex) {
   std::cerr << "made dataRaster instance\n";
 
   m_spectrogram->setData(dataRaster.release());
+  emit currentFileNameChanged();
   std::cerr << "set Data\n";
   emit currentFileDeltaTPerSampleChanged(m_current_file->getDeltaTPerSample());
   update();

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Bass
 
 Item {
     id: root
@@ -12,6 +13,7 @@ Item {
     property double x_0: 0.0
     property double x_scale: 1.0
     property bool deBUG: true
+    property string currentFileName: ""
     // Cursor line
     Rectangle {
         id: cursorLine
@@ -50,6 +52,7 @@ Item {
                 height: root.height
                 color: root.boundaryColor
                 opacity: 1
+                visible: model.fileName == root.currentFileName
             }
 
             // Right boundary
@@ -61,7 +64,7 @@ Item {
                 height: root.height
                 color: root.boundaryColor
                 opacity: 1
-                visible: !model.isPartial
+                visible: !model.isPartial & model.fileName == root.currentFileName
             }
 
             // Label
@@ -72,6 +75,7 @@ Item {
                 color: "#FFFFFF"
                 font.pixelSize: 11
                 font.bold: true
+                visible: model.fileName == root.currentFileName
             }
         }
     }

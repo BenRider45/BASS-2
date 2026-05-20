@@ -25,24 +25,25 @@ QVariant AnnotationModel::data(const QModelIndex &index, int role) const {
     return frame.syllableId;
   case isPartialRole:
     return frame.isPartial;
+  case FileNameRole:
+    return frame.fileName;
   }
+
   return {};
 }
 
 QHash<int, QByteArray> AnnotationModel::roleNames() const {
-  return {{StartFrameRole, "startFrame"},
-          {EndFrameRole, "endFrame"},
-          {LabelRole, "label"},
-          {SyllableIdRole, "syllableId"},
-          {isPartialRole, "isPartial"}};
+  return {{StartFrameRole, "startFrame"}, {EndFrameRole, "endFrame"},
+          {LabelRole, "label"},           {FileNameRole, "fileName"},
+          {SyllableIdRole, "syllableId"}, {isPartialRole, "isPartial"}};
 }
 
 int AnnotationModel::count() const { return m_frames.size(); }
 
 int AnnotationModel::addFrame(int start, int end, const QString &label,
-                              bool isPartial) {
+                              bool isPartial, QString fileName) {
   beginInsertRows(QModelIndex(), m_frames.size(), m_frames.size());
-  m_frames.append({start, end, label, -1, isPartial});
+  m_frames.append({start, end, label, -1, isPartial, fileName});
   endInsertRows();
   emit countChanged();
   return m_frames.size() - 1;
@@ -65,9 +66,10 @@ void AnnotationModel::editLabel(int index, const QString &newLabel) {
   emit dataChanged(this->index(index), this->index(index), {LabelRole});
 }
 
-int AnnotationModel::beginFrame(const int start) {
-  std::cerr << "In beginFrame with start: " << start << "\n";
-  return addFrame(start, -1, "No Label", true);
+int AnnotationModel::beginFrame(const int start, QString fileName) {
+  std::cerr << "In beginFrame with start: " << start
+            << " at file: " << fileName.toStdString() << "\n";
+  return addFrame(start, -1, "No Label", true, fileName);
 }
 
 void AnnotationModel::completeFrame(const int index, const int end) {

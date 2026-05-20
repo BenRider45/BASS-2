@@ -11,6 +11,7 @@ struct AnnotationFrame {
   QString label = "";
   int syllableId = -1;
   bool isPartial = false;
+  QString fileName = "";
   // double x_0;
   // double x_scale;
 };
@@ -24,6 +25,7 @@ public:
     StartFrameRole = Qt::UserRole + 1,
     EndFrameRole,
     LabelRole,
+    FileNameRole,
     SyllableIdRole,
     isPartialRole
   };
@@ -38,8 +40,8 @@ public:
   int count() const;
 
   Q_INVOKABLE int addFrame(const int start, const int end, const QString &label,
-                           bool isPartial);
-  Q_INVOKABLE int beginFrame(const int start);
+                           bool isPartial, QString fileName);
+  Q_INVOKABLE int beginFrame(const int start, QString fileName);
   Q_INVOKABLE void completeFrame(const int index, const int end);
 
   Q_INVOKABLE void removeFrame(const int index);

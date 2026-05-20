@@ -160,6 +160,8 @@ ApplicationWindow {
                     }
                     onFileSelected: index => {
                         spectrogramView.renderNewFile(index);
+                        //console.log("Opening file with name: ", spectrogramView.getCurrentFileName());
+                        overlay.currentFileName = spectrogramView.getCurrentFileName();
                     }
                 }
                 ClusterSummaryPanel {}
@@ -295,6 +297,7 @@ ApplicationWindow {
                 SplitView.fillWidth: true
                 SplitView.minimumHeight: 256
                 property alias spectrogramView: spectrogramView
+                property alias overlay: overlay
                 property int annotationMode: 0
                 property int partialAnnotationIndex: 0
                 property int partialAnnotationBeginX: 0
@@ -309,9 +312,7 @@ ApplicationWindow {
                     switch (annotationMode) {
                     case 0:
                         console.log("Beginning annotation with cursor at: ", overlay.cursorX);
-                        //TODO Try saving scaling and x_0 for each annotation?
-                        //Applying those on render and then also current change? using the addition of both?
-                        partialAnnotationIndex = annotationModel.beginFrame((overlay.cursorX / overlay.x_scale) + overlay.x_0);
+                        partialAnnotationIndex = annotationModel.beginFrame((overlay.cursorX / overlay.x_scale) + overlay.x_0, overlay.currentFileName);
 
                         partialAnnotationBeginX = overlay.cursorX;
                         break;
@@ -412,6 +413,7 @@ ApplicationWindow {
                     x_0: spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.X0)
                     x_scale: spectrogramView.getSpectrogramValue(SpectrogramProvider.CONFIG_TYPE.XSCALE)
                     deBUG: window.deBUG
+                    currentFileName: ""
                 }
                 MouseArea {
                     id: spectrogramAnnotationScaffoldMouseArea

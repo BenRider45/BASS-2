@@ -30,6 +30,10 @@ Item {
     function getDeltaTPerSample() {
         return spectrogram.current_File_Delta_T_Per_Sample;
     }
+    function getCurrentFileName() {
+        console.log("In getCurrentFIleName SV Level");
+        return hi.currentFileName;
+    }
     signal spectrogramProviderConfigChanged(double value, var configOption)
     signal currentFileDeltaTPerSampleChanged(double value)
     property int cursorX: width / 2
@@ -90,6 +94,7 @@ Item {
                 }
             }
 
+            property string currentFileName: spectrogram.currentFileName
             SpectrogramProvider {
                 id: spectrogram
                 onCurrentFileDeltaTPerSampleChanged: function (value) {
