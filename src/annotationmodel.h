@@ -34,7 +34,6 @@ public:
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
   QHash<int, QByteArray> roleNames() const override;
-
   int count() const;
   QVector<AnnotationFrame> getData();
   Q_INVOKABLE int addFrame(const int start, const int end, const QString &label,
@@ -42,7 +41,7 @@ public:
   Q_INVOKABLE int beginFrame(const int start, QString fileName);
   Q_INVOKABLE void completeFrame(const int index, const int end);
 
-  Q_INVOKABLE void removeFrame(const int index);
+  Q_INVOKABLE bool removeFrame(const int index);
   Q_INVOKABLE void editLabel(const int index, const QString &newLabel);
   Q_INVOKABLE void save();
   Q_INVOKABLE void load(const QString &path);

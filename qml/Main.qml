@@ -381,13 +381,19 @@ ApplicationWindow {
                         event.accepted = true;
                         break;
                     case Qt.Key_Plus:
+                        event.accepted = true;
                     case Qt.Key_Equal:
                         spectrogramView.cursorStep = Math.min(50, spectrogramView.cursorStep + 1);
-                        event.accepted = true;
                         break;
                     case Qt.Key_Minus:
                         spectrogramView.cursorStep = Math.max(1, spectrogramView.cursorStep - 1);
                         event.accepted = true;
+                        break;
+                    case Qt.Key_Backspace:
+                        console.log("back");
+                        console.log(overlay.howManySelected());
+                        overlay.deleteSelected();
+
                         break;
                     }
                 }

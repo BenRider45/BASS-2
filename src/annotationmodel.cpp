@@ -57,13 +57,14 @@ int AnnotationModel::addFrame(int start, int end, const QString &label,
   return m_frames.size() - 1;
 }
 
-void AnnotationModel::removeFrame(int index) {
+bool AnnotationModel::removeFrame(int index) {
   if (index < 0 || index >= m_frames.size())
-    return;
+    return false;
   beginRemoveRows(QModelIndex(), index, index);
   m_frames.removeAt(index);
   endRemoveRows();
   emit countChanged();
+  return true;
 }
 
 void AnnotationModel::editLabel(int index, const QString &newLabel) {
