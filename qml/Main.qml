@@ -311,15 +311,21 @@ ApplicationWindow {
                     console.log("Current Annotation Mode: ", annotationMode);
                     switch (annotationMode) {
                     case 0:
+                        if (overlay.howManySelected() > 0) {
+                            console.log("ERROR: cannot start annotation within another annotation\n");
+                            annotationMode -= 1;
+                            break;
+                        }
                         console.log("Beginning annotation with cursor at: ", overlay.cursorX);
+
                         partialAnnotationIndex = projectManager.annotationsModel.beginFrame((overlay.cursorX / overlay.x_scale) + overlay.x_0, overlay.currentFileName);
 
-                        partialAnnotationBeginX = overlay.cursorX;
+                        partialAnnotationBeginX = (overlay.cursorX / overlay.x_scale) + overlay.x_0;
                         break;
                     case 1:
-                        if (overlay.cursorX > partialAnnotationBeginX) {
+                        var index = (overlay.cursorX / overlay.x_scale) + overlay.x_0;
+                        if (overlay.cursorX > partialAnnotationBeginX & overlay.howManySelected() == 0 & overlay.verifyAnnotation(partialAnnotationBeginX, index)) {
                             console.log("Valid End Frame");
-                            var index = (overlay.cursorX / overlay.x_scale) + overlay.x_0;
                             projectManager.annotationsModel.completeFrame(partialAnnotationIndex, index);
                             console.log("Index: ", overlay.cursorX);
                             promptDialog.modifyingIndex = partialAnnotationIndex;
@@ -327,6 +333,9 @@ ApplicationWindow {
                             promptDialog.open();
                             break;
                         } else {
+                            if (overlay.howManySelected() > 0) {
+                                console.log("ERROR: cannot finish annotation within another annotation boundary\n");
+                            }
                             annotationMode -= 1;
                         }
                         break;

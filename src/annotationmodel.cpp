@@ -1,4 +1,5 @@
 #include "annotationmodel.h"
+#include "audioFilesModel.h"
 #include "metamanager.h"
 #include <iostream>
 AnnotationModel::AnnotationModel(QObject *parent)
@@ -111,4 +112,38 @@ void AnnotationModel::load(const QString &path) {
   }
   emit endInsertRows();
   return;
+}
+
+Q_INVOKABLE QModelIndexList AnnotationModel::match(const QModelIndex &start,
+                                                   int role,
+                                                   const QVariant &value,
+                                                   int hits,
+                                                   Qt::MatchFlags flags) const {
+
+  QModelIndexList outLst;
+  for (int i = start.row(); i < m_frames.size(); i++) {
+    std::cerr << "Data: " << data(index(i), role).toString().toStdString()
+              << "\n"
+              << "Value: " << value.toString().toStdString() << "\n";
+    if (data(index(i), role) == value) {
+      outLst.append(index(i));
+    }
+  }
+  return outLst;
+}
+
+Q_INVOKABLE QModelIndexList
+AnnotationModel::getCurrentFilesAnnotationList(QString fileName) const {
+  QModelIndexList res = match(index(0), FileNameRole, fileName);
+  std::cerr << "Res.len: " << res.size() << "\n";
+  return res;
+}
+
+Q_INVOKABLE int
+AnnotationModel::getStartingFrame(const QModelIndex &annotation) {
+  return data(annotation, AnnotationModel::StartFrameRole).toInt();
+}
+Q_INVOKABLE
+int AnnotationModel::getEndingFrame(const QModelIndex &annotation) {
+  return data(annotation, AnnotationModel::EndFrameRole).toInt();
 }

@@ -17,18 +17,11 @@ Item {
 
     function howManySelected() {
         var output = 0;
-        console.log("how many selected");
         var annotationStatus = annotationSelectionStatus();
-        console.log("annotatationStatus: ", annotationStatus);
 
         for (var i = 0; i < annotationStatus.length; i++) {
             if (annotationStatus[i]) {
-                console.log("Selected");
                 output = output + 1;
-                console.log("Now output: ", output);
-            } else {
-                console.log("not selected :(");
-                console.log("Now output: ", output);
             }
         }
         return output;
@@ -42,6 +35,29 @@ Item {
                 console.log("removed annotation at index ", i);
             }
         }
+    }
+
+    function verifyAnnotation(start, end) {
+        console.log("verifying Annotation: start: (", start, ", ", end, ")");
+        var relevantAnnotations = projectManager.annotationsModel.getCurrentFilesAnnotationList(currentFileName);
+        console.log("Relevant Annotations (those for file", currentFileName, "): ", relevantAnnotations);
+        console.log("relevantAnnotations.length: ", relevantAnnotations.length);
+        for (let idx = 0; idx < relevantAnnotations.length; idx++) {
+
+            // idx = relevantAnnotations[i].row;
+
+            console.log("looking at idx: ", relevantAnnotations[idx].row);
+            let leftBound = projectManager.annotationsModel.getStartingFrame(relevantAnnotations[idx]);
+
+            let rightBound = projectManager.annotationsModel.getEndingFrame(relevantAnnotations[idx]);
+            if (rightBound != -1) {   //ignoring partial annotation
+                console.log("Checking annotation with coords: (", leftBound, ", ", rightBound, ")");
+                if ((leftBound >= start & leftBound <= end) & (rightBound <= start || rightBound <= end)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     // Cursor line
     Rectangle {
@@ -76,7 +92,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 delegate: Text {
-                    color: repeater.itemAt(model.index).modelData.selected ? Color.Green : Color.Red
+                    color: repeater.itemAt(model.index).selected ? "green" : "red"
 
                     //size: 20
                     text: model.index

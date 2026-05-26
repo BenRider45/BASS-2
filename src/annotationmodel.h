@@ -27,7 +27,6 @@ public:
     SyllableIdRole,
     isPartialRole
   };
-
   explicit AnnotationModel(QObject *parent = nullptr);
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -45,7 +44,17 @@ public:
   Q_INVOKABLE void editLabel(const int index, const QString &newLabel);
   Q_INVOKABLE void save();
   Q_INVOKABLE void load(const QString &path);
+  Q_INVOKABLE QModelIndexList
+  getCurrentFilesAnnotationList(QString fileName) const;
   void clearModel();
+  Q_INVOKABLE int getStartingFrame(const QModelIndex &annotation);
+  Q_INVOKABLE int getEndingFrame(const QModelIndex &annotation);
+  QModelIndexList
+  match(const QModelIndex &start, int role, const QVariant &value,
+        int hits = -1,
+        Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchStartsWith |
+                                              Qt::MatchWrap)) const override;
+
 signals:
   void currentFileChanged();
   void countChanged();
