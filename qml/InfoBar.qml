@@ -65,6 +65,7 @@ Rectangle {
               implicitHeight: 50
               implicitWidth:tableView.width 
 
+              color: model.fileName == root.currentFileName ? "#28B5F5" : "#9DDCF9"
               radius: 10 
               RowLayout{
                 anchors.fill: parent
