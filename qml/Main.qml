@@ -7,6 +7,8 @@ import Constants 1.0
 import BASSGraphics 1.0
 import BASS
 
+import Qt.labs.qmlmodels
+
 ApplicationWindow {
     id: window
     width: 1280
@@ -143,9 +145,9 @@ ApplicationWindow {
                 TabButton {
                     text: "Files"
                 }
-                TabButton {
-                    text: "Clusters"
-                }
+                // TabButton {
+                //     text: "Clusters"
+                // }
             }
 
             StackLayout {
@@ -164,7 +166,7 @@ ApplicationWindow {
                         overlay.currentFileName = spectrogramView.getCurrentFileName();
                     }
                 }
-                ClusterSummaryPanel {}
+                // ClusterSummaryPanel {}
             }
         }
     }
@@ -199,12 +201,12 @@ ApplicationWindow {
             TabBar {
                 id: rightTabBar
                 Layout.fillWidth: true
-                TabButton {
-                    text: "Control"
-                }
-                TabButton {
-                    text: "Player"
-                }
+                // TabButton {
+                //     text: "Control"
+                // }
+                // TabButton {
+                //     text: "Player"
+                // }
                 TabButton {
                     text: "Settings"
                 }
@@ -215,8 +217,8 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                ControlPanel {}
-                PlayerPanel {}
+                // ControlPanel {}
+                // PlayerPanel {}
                 //TODO This design is super clunky, the spectrogramView and SettingsPanel are so coupled together all of these function calls are redundant
                 //The Settings Panel needs refactored such that any component who needs a section in the setting panel OWN the front end to that settings panel.
                 //Perhaps an abstract settings Panel Module which allows for dynamic addition of settings? (list model!!!)
@@ -442,9 +444,51 @@ ApplicationWindow {
             }
             InfoBar {
                 //SplitView.Layout.fillWidth: true
-
-                SplitView.Layout.fillHeight: true
+                currentFileName: overlay.currentFileName
+                //SplitView.Layout.fillHeight: true
             }
+
+            // TableView {
+            //     columnSpacing: 1
+            //     rowSpacing: 1
+            //     SplitView.Layout.fillWidth: true
+            //     clip: true
+            //     model: TableModel {
+            //         TableModelColumn {
+            //             display: "SylID"
+            //         }
+            //         TableModelColumn {
+            //             display: "FileName"
+            //         }
+            //
+            //         rows: [
+            //             {
+            //                 "SylID": "cat",
+            //                 "FileName": "black"
+            //             },
+            //             {
+            //                 "SylID": "dog",
+            //                 "FileName": "brown"
+            //             },
+            //             {
+            //                 "SylID": "bird",
+            //                 "FileName": "white"
+            //             }
+            //         ]
+            //     }
+            //
+            //     delegate: Item {
+            //         Rectangle {
+            //             implicitWidth: 100
+            //             implicitHeight: 50
+            //             border.width: 1
+            //
+            //             Text {
+            //                 text: model.display
+            //             }
+            //         }
+            //     }
+            // }
         }
     }
 
