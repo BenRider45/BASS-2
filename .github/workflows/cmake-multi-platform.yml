@@ -62,13 +62,13 @@ jobs:
 
       - name: Install Qwt via vcpkg
         if: '${{matrix.os}} == "windows-latest"'
-        run: >
+        run: |
           vcpkg integrate install 
           vcpkg install qwt:x64-windows
 
       - name: Install Qwt
         if: '${{matrix.os}} == "ubuntu-latest"'
-        run: >
+        run: |
           sudo apt-get update
           sudo apt-get install libqwt-qt6-dev
 
