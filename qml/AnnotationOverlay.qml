@@ -127,6 +127,7 @@ Item {
                 color: selected ? "#FFFFFF" : root.boundaryColor
                 opacity: 1
                 ColumnLayout {
+                    anchors.fill: parent
                     Repeater {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
