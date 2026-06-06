@@ -12,4 +12,4 @@ Currently, required dependencies are:
 
 - all submodules (installed with command `git submodule update --init --recursive`)
 - cmake
-- mingw compiler (for windows)
+- gcc or other c++ compiler 
