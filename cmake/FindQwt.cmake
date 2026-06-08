@@ -29,6 +29,7 @@ find_library(QWT_LIBRARY
     "$ENV{LIB}"
 )
 
+message(STATUS "Runnint FindQwt")
 set(_qwt_fw)
 if(QWT_LIBRARY MATCHES "/qwt.*\\.framework")
   string(REGEX REPLACE "^(.*/qwt.*\\.framework).*$" "\\1" _qwt_fw "${QWT_LIBRARY}")
