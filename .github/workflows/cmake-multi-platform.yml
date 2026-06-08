@@ -73,7 +73,10 @@ jobs:
 
       - name: Install Qwt (macOS)
         if: matrix.os == 'macos-latest'
-        run: brew install qwt
+        run: >
+          brew install qwt
+          export CXX="clang"
+
       # - name: Install Qwt
       #   if: matrix.os == 'ubuntu-latest'
       #   run: |
