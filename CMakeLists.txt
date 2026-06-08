@@ -10,7 +10,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake"  )
 
 
 include(FindQwt)
-
+message(STATUS "FIND QWT VARIABLES: ")
+message(STATUS "QWT_FOUND: ${QWT_FOUND}, QWT_LIBRARY: ${QWT_LIBRARY}, QWT_INCLUDE_DIR: ${QWT_INCLUDE_DIR}")
 find_package(Qt6 REQUIRED COMPONENTS Core Quick QuickControls2 Multimedia)
 find_package(Qwt REQUIRED)
 set(QT_QML_GENERATE_QMLLS_INI ON)
