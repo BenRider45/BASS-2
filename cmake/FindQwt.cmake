@@ -29,7 +29,7 @@ find_library(QWT_LIBRARY
     "$ENV{LIB}"
 )
 
-message(STATUS "Running FindQwt");
+# message(STATUS "Running FindQwt");
 
 set(_qwt_fw)
 
