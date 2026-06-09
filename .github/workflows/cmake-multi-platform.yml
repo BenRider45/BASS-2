@@ -54,11 +54,19 @@ jobs:
         shell: bash
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-      - name: Install Qt
+      - name: Install Qt (non Mac OS)
+        if: matrix.os != 'macos-latest'
         uses: jurplel/install-qt-action@v4
         with:
           modules: qtmultimedia
           version: 6.11
+
+      - name: install Qt + qwt (macOS)
+        if: matrix.os == 'macos.latest'
+        run: |
+          brew install qt6 qwt
+          echo "QWT_INSTALL=$(brew --prefix qwt)" >> $GITHUB_ENV
+          echo "Qt6_DIR=$(brew --prefix qt6)/lib/cmake/Qt6" >> $GITHUB_ENV
 
       - name: Install Qwt (Windows)
         if: matrix.os == 'windows-latest'
@@ -73,15 +81,15 @@ jobs:
           export QWT_INSTALL=${dpkg -L libqwt-qt5-dev}
           export QWT_LIB_NAME=libqwt-qt5-dev
 
-      - name: Install Qwt (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install qwt
-          brew unlink qt  || true    
-          brew unlink qtbase || true
-          brew unlink qtsvg || true
-          brew unlink qtdeclarative || true
-          brew unline qttools || true
+      # - name: Install Qwt (macOS)
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     brew install qwt
+      #     brew unlink qt  || true
+      #     brew unlink qtbase || true
+      #     brew unlink qtsvg || true
+      #     brew unlink qtdeclarative || true
+      #     brew unlink qttools || true
 
       # - name: Install Qwt
       #   if: matrix.os == 'ubuntu-latest'
