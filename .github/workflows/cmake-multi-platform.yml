@@ -128,5 +128,5 @@ jobs:
         if: matrix.os == 'macos-latest' && success()
         uses: actions/upload-artifact@v7
         with:
-          name: MACOS Build V$VERSION
-          path: ${{steps.strings.outputs.build-output-dir}}
+          name: MACOS Build V ${{VERSION}}
+          path: ${{steps.strings.outputs.build-output-dir}}/bass_qml
