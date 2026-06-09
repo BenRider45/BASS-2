@@ -16,7 +16,7 @@ find_package(Qwt REQUIRED)
 set(QT_QML_GENERATE_QMLLS_INI ON)
 
 qt_policy(SET QTP0004 NEW)
-qt_standard_project_setup(REQUIRES 6.5)
+qt_standard_project_setup(REQUIRES 6.11)
 
 option(BUILD_TESTS "Build unit tests" ON)
 set(SOURCES
