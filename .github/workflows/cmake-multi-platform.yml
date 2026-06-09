@@ -1,4 +1,4 @@
-# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# This starter workflow is for a cMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on multiple platforms
 
@@ -128,5 +128,5 @@ jobs:
         if: matrix.os == 'macos-latest' && success()
         uses: actions/upload-artifact@v7
         with:
-          name: MACOS Build V ${{VERSION}}
+          name: MACOS Build V ${{$VERSION}}
           path: ${{steps.strings.outputs.build-output-dir}}/bass_qml
