@@ -79,6 +79,9 @@ jobs:
           brew install qwt
           brew unlink qt  || true    
           brew unlink qtbase || true
+          brew unlink qtsvg || true
+          brew unlink qtdeclarative || true
+          brew unline qttools || true
 
       # - name: Install Qwt
       #   if: matrix.os == 'ubuntu-latest'
