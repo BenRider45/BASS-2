@@ -68,8 +68,8 @@ jobs:
       - name: Install Qwt (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: >
-          sudo apt-get install -y libqwt-qt5-dev|
-          export QWT_INSTALL=${dpkg -L libqwt-qt6-dev}
+          sudo apt-get install -y libqwt-qt5-dev
+          export QWT_INSTALL=${{dpkg -L libqwt-qt6-dev}}
           export QWT_LIB_NAME=libqwt-qt5-dev
 
       - name: Install Qwt (macOS)
