@@ -1,8 +1,8 @@
 #pragma once
 #include "fftforeman.h"
-#include <QwtInterval>
-#include <QwtRasterData>
 #include <algorithm>
+#include <qwt_interval.h>
+#include <qwt_raster_data.h>
 #include <qwt_transform.h>
 template <typename T>
 class SpectrogramDataRasterInstance : public QwtRasterData {
