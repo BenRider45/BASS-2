@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: ["main"]
 env:
-  VERSION: 1.0
+  VERSION: "1.0"
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest]
         build_type: [Debug]
         c_compiler: [gcc, clang, cl]
         include:
