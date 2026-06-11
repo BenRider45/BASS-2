@@ -12,6 +12,7 @@
 #include <numbers>
 
 namespace fftforemanutils {
+
 template <typename T>
 std::vector<std::complex<T>>
 getComplexValuedBuffer(WavFile<SharedTypeDefs::WAVFILE_SAMPLE> wavFile) {
@@ -131,15 +132,26 @@ inline void scale(std::vector<std::complex<T>> &v, const int n) {
   }
 }
 
-template <typename T>
-inline void applyHanning(std::vector<std::complex<T>> &data) {
+template <typename T> void applyHanning(std::vector<std::complex<T>> &data) {
   int L = data.size();
 
   for (int n = 0; n < L; n++) {
 
-    data[n] *= (1.0 / L) * (.5 - .5 * std::cos((2 * std::numbers::pi * n) / L));
+    data[n] *=
+        //(20.0 / L) *
+        (.5 - .5 * std::cos((2 * std::numbers::pi * n) / L));
+    // std::cout << "data[n]: " << data[n] << "\n";
   }
 }
+
+// template <typename T>
+// void applyKaiser(double beta, std::vector<std::complex<T>> &data) {
+//   int L = data.size();
+//
+//   for (int n = 0; n < L; n++) {
+//     data[n] *= std::cyl_bessel_i(0, std::static_cast<double>(n));
+//   }
+// }
 } // namespace fftforemanutils
 
 namespace FFTForeman {
@@ -184,8 +196,9 @@ performSTFT(const std::vector<std::complex<T>> &data, int window_length,
   size_t n = data.size();
   assert(fftforemanutils::is_power_of_2(window_length) &&
          "Window length is now power of 2");
-  std::cerr << "Window_length: " << window_length << "\n Hop_size: " << hop_size
-            << "\n";
+  // std::cerr << "Window_length: " << window_length << "\n Hop_size: " <<
+  // hop_size
+  //         << "\n";
   assert(hop_size < window_length &&
          "Hop length must be smaller than window size");
   std::vector<std::complex<T>> outData;
@@ -203,6 +216,7 @@ performSTFT(const std::vector<std::complex<T>> &data, int window_length,
 
     std::vector<std::complex<T>> subset(data.begin() + win_start,
                                         data.begin() + win_end);
+    fftforemanutils::applyHanning(subset);
     fftforemanutils::FFT_DATA<T> d = performFFT(subset, sample_rate);
     if (i == 0) {
       metadata.frequencyBins = d.m_metadata.frequencyBins;
@@ -229,6 +243,7 @@ template <typename T>
 fftforemanutils::STFT_DATA<T>
 STFT(const WavFile<SharedTypeDefs::WAVFILE_SAMPLE> &file,
      int window_length = 64, int hop_size = 32) {
+  std::cout << "inside of STFT\n";
   std::vector<std::complex<T>> data =
       fftforemanutils::getComplexValuedBuffer<T>(file);
 

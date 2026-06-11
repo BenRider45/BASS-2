@@ -10,6 +10,7 @@ Item {
     signal y0Changed(double value)
     signal windowLengthChanged(int value)
     signal hopLengthChanged(int value)
+    signal windowFunctionChanged(string func)
     signal reRenderRequest
     property alias spectSettingsGroup: spectrogramSettingsGroup
     function getxScale() {
@@ -265,9 +266,14 @@ Item {
                                 value: 8
                                 stepSize: 1
                                 onValueModified: () => {
-                                    hopLengthChanged(value);
+                                    root.hopLengthChanged(value);
                                     spectrogramSettingsGroup.isDirty = true;
                                 }
+                            }
+                            ComboBox {
+                                id: windowFunction
+                                model: ["Hanning", "Kaiser"]
+                                onAccepted: root.windowFunctionChanged(currentText)
                             }
 
                             Button {

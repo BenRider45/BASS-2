@@ -10,6 +10,9 @@ Item {
     property int cursorStepSize: 5
     property color cursorColor: "#FF4444"
     property color boundaryColor: "#44FF44"
+    property color boundaryStartColor: "#fc0855"
+    property color boundaryEndColor: "#fc08ec"
+
     property double x_0: 0.0
     property double x_scale: 1.0
     property bool deBUG: true
@@ -122,23 +125,23 @@ Item {
             Rectangle {
                 x: model.startFrame * x_scale - x_0 * x_scale
                 y: 0
-                width: 10
+                width: 3
                 height: root.height
-                color: selected ? "#FFFFFF" : root.boundaryColor
+                color: selected ? "#FFFFFF" : root.boundaryStartColor
                 opacity: 1
-                ColumnLayout {
-                    anchors.fill: parent
-                    Repeater {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        model: 15
-                        delegate: Rectangle {
-                            height: 3
-                            width: parent.width
-                            color: "white"
-                        }
-                    }
-                }
+                // ColumnLayout {
+                //     anchors.fill: parent
+                //     Repeater {
+                //         Layout.fillWidth: true
+                //         Layout.fillHeight: true
+                //         model: 15
+                //         delegate: Rectangle {
+                //             height: 3
+                //             width: parent.width
+                //             color: "white"
+                //         }
+                //     }
+                // }
                 visible: model.fileName == root.currentFileName
             }
 
@@ -147,22 +150,22 @@ Item {
                 //x: ((model.endFrame % root.width) - root.x_0) * root.x_scale
                 x: model.endFrame * x_scale - x_0 * x_scale
                 y: 0
-                width: 10
+                width: 3
                 height: root.height
-                color: selected ? "#FFFFFF" : root.boundaryColor
+                color: selected ? "#FFFFFF" : root.boundaryEndColor
                 opacity: 1
-                ColumnLayout {
-                    Repeater {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        model: 15
-                        delegate: Rectangle {
-                            height: 30
-                            width: parent.width
-                            color: "orange"
-                        }
-                    }
-                }
+                // ColumnLayout {
+                //     Repeater {
+                //         Layout.fillWidth: true
+                //         Layout.fillHeight: true
+                //         model: 15
+                //         delegate: Rectangle {
+                //             height: 30
+                //             width: parent.width
+                //             color: "orange"
+                //         }
+                //     }
+                // }
                 visible: !model.isPartial & model.fileName == root.currentFileName
             }
 

@@ -112,11 +112,11 @@ target_link_libraries(bass_qml PRIVATE
     Qt6::Multimedia
 )
 
-if(APPLE)
-  set_target_properties(bass_qml PROPERTIES
-    MACOSX_BUNDLE TRUE
-)
-endif()
+# if(APPLE)
+#   set_target_properties(bass_qml PROPERTIES
+#     MACOSX_BUNDLE TRUE
+# )
+#endif()
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
